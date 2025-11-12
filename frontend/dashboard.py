@@ -37,7 +37,7 @@ class Dashboard:
         
         tk.Label(
             content_frame,
-            text="👆 Use the sidebar to navigate through different sections",
+            text="👆 Use the sidebar to navigate through different section",
             font=('Arial', 16),
             fg='#7f8c8d',
             bg='white'

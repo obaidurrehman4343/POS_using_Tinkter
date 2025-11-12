@@ -1,11 +1,10 @@
-
 # import tkinter as tk
 # from tkinter import ttk, messagebox, filedialog
 # from backend.database import Database
 # from PIL import Image, ImageTk
 # import os
 
-# class RoofSheetForm:
+# class LiminationSheetForm:
 #     def __init__(self, parent, db, current_category, refresh_callback):
 #         self.parent = parent
 #         self.db = db
@@ -14,20 +13,20 @@
 #         self.setup_form()
     
 #     def setup_form(self):
-#         """Setup the roof sheet form - Smaller size and positioned below button"""
+#         """Setup the limination sheet form"""
 #         self.dialog = tk.Toplevel(self.parent)
-#         self.dialog.title("Add Roof Sheet Product")
-#         self.dialog.geometry("450x550")  # 🆕 Smaller size
+#         self.dialog.title("Add Limination Sheet Product")
+#         self.dialog.geometry("450x550")  # Smaller size
 #         self.dialog.configure(bg='white')
 #         self.dialog.transient(self.parent)
 #         self.dialog.grab_set()
         
-#         # 🆕 Position below Add Product button
-#         self.position_form_below_button()
+#         # Position within dashboard boundaries
+#         self.position_form_within_dashboard()
         
 #         self.create_form_content()
     
-#     def position_form_below_button(self):
+#     def position_form_within_dashboard(self):
 #         """Position the form within dashboard boundaries"""
 #         # Wait for the parent window to update its geometry
 #         self.parent.update_idletasks()
@@ -76,29 +75,29 @@
 #         canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
 #         canvas.configure(yscrollcommand=scrollbar.set)
         
-#         canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)  # 🆕 Smaller padding
+#         canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)
 #         scrollbar.pack(side="right", fill="y")
         
 #         # Form Title
 #         tk.Label(
 #             self.scrollable_frame,
-#             text="Add Roof Sheet Product",
-#             font=('Arial', 16, 'bold'),  # 🆕 Smaller font
+#             text="Add Limination Sheet Product",
+#             font=('Arial', 16, 'bold'),
 #             fg='#2c3e50',
 #             bg='white'
-#         ).pack(anchor='w', pady=(0, 15))  # 🆕 Smaller padding
+#         ).pack(anchor='w', pady=(0, 15))
         
 #         # Image Upload Section
 #         image_frame = tk.Frame(self.scrollable_frame, bg='white')
-#         image_frame.pack(fill=tk.X, pady=8)  # 🆕 Smaller padding
+#         image_frame.pack(fill=tk.X, pady=8)
         
 #         tk.Label(
 #             image_frame,
 #             text="Product Image:",
-#             font=('Arial', 10, 'bold'),  # 🆕 Smaller font
+#             font=('Arial', 10, 'bold'),
 #             fg='#2c3e50',
 #             bg='white',
-#             width=12,  # 🆕 Smaller width
+#             width=12,
 #             anchor='w'
 #         ).pack(side=tk.LEFT)
         
@@ -106,12 +105,12 @@
 #         image_entry = tk.Entry(
 #             image_frame, 
 #             textvariable=self.image_path_var,
-#             font=('Arial', 10),  # 🆕 Smaller font
+#             font=('Arial', 10),
 #             relief='solid', 
 #             bd=1,
 #             state='readonly'
 #         )
-#         image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))  # 🆕 Smaller padding
+#         image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))
         
 #         def browse_image():
 #             file_path = filedialog.askopenfilename(
@@ -124,7 +123,7 @@
 #         browse_btn = tk.Button(
 #             image_frame,
 #             text="Browse",
-#             font=('Arial', 9),  # 🆕 Smaller font
+#             font=('Arial', 9),
 #             bg='#95a5a6',
 #             fg='white',
 #             relief='flat',
@@ -132,49 +131,58 @@
 #         )
 #         browse_btn.pack(side=tk.RIGHT)
         
-#         # 🏗️ Roof Sheet Specific Fields
+#         # 🏗️ Limination Sheet Specific Fields
 #         fields = [
-#             ("Company", "text"),
-#             ("Type", "text"),
-#             ("Color", "text"),
-#             ("size", "text"),  # 🆕 Volume instead of Packing
-#             ("Purchase Price", "number"),
-#             ("Sale Price", "number"),
-#             ("Stock", "number")
-#         ]
+#             ("Company", "text", "e.g., Diamond, Metro, Sapphire"),
+#             ("Color", "text", "e.g., Silver, Golden, Wooden"),
+#             ("Size", "text", "e.g., 8x4, 10x3, 12x4"),  # 🆕 Add size examples
+#             ("Type", "text", "e.g., Glossy, Matte, Textured"),
+#             ("Purchase Price", "number", "0"),
+#             ("Sale Price", "number", "0"),
+#             ("Stock", "number", "0")
+# ]
         
 #         self.entries = {}
-        
-#         for field_name, field_type in fields:
-#             frame = tk.Frame(self.scrollable_frame, bg='white')
-#             frame.pack(fill=tk.X, pady=6)  # 🆕 Smaller padding
-            
-#             tk.Label(
-#                 frame,
-#                 text=f"{field_name}:",
-#                 font=('Arial', 10, 'bold'),  # 🆕 Smaller font
-#                 fg='#2c3e50',
-#                 bg='white',
-#                 width=12,  # 🆕 Smaller width
-#                 anchor='w'
-#             ).pack(side=tk.LEFT)
-            
-#             if field_type == 'number':
-#                 entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')  # 🆕 Smaller font
-#                 entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
-#             else:
-#                 entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)  # 🆕 Smaller font
-            
-#             entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)  # 🆕 Smaller padding
-#             self.entries[field_name] = entry
+
+#         for field_name, field_type, placeholder in fields:
+#                 frame = tk.Frame(self.scrollable_frame, bg='white')
+#                 frame.pack(fill=tk.X, pady=6)
+                
+#                 tk.Label(
+#                     frame,
+#                     text=f"{field_name}:",
+#                     font=('Arial', 10, 'bold'),
+#                     fg='#2c3e50',
+#                     bg='white',
+#                     width=12,
+#                     anchor='w'
+#                 ).pack(side=tk.LEFT)
+                
+#                 if field_type == 'number':
+#                     entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')
+#                     entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
+#                 else:
+#                     entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)
+                
+#                 # 🆕 Add placeholder text
+#                 if placeholder:
+#                     entry.insert(0, placeholder)
+#                     # Clear placeholder on focus
+#                     def clear_placeholder(event, e=entry, p=placeholder):
+#                         if e.get() == p:
+#                             e.delete(0, tk.END)
+#                     entry.bind('<FocusIn>', clear_placeholder)
+                
+#                 entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)
+#                 self.entries[field_name] = entry
         
 #         # Buttons
 #         button_frame = tk.Frame(self.scrollable_frame, bg='white')
-#         button_frame.pack(fill=tk.X, pady=15)  # 🆕 Smaller padding
+#         button_frame.pack(fill=tk.X, pady=15)
         
 #         def save_product():
 #             try:
-#                 # 🏗️ Map roof sheet fields to database columns
+#                 # 🏗️ Map limination sheet fields to database columns
 #                 product_data = {
 #                     'category_id': self.current_category,
 #                     'company': self.entries['Company'].get().strip(),
@@ -182,21 +190,46 @@
 #                     'color': self.entries['Color'].get().strip(),
 #                     'sale_price': float(self.entries['Sale Price'].get() or 0),
 #                     'purchase_price': float(self.entries['Purchase Price'].get() or 0),
-#                     'packing': "",  # Not used for roof sheets
-#                     'volume': self.entries['size'].get().strip(),  # Using 'volume' column for size
+#                     'packing': "",  # Not used for limination sheets
+#                     'volume': self.entries['Size'].get().strip(),  # Using 'volume' column for size
 #                     'current_stock': int(self.entries['Stock'].get() or 0),
 #                     'image_path': self.image_path_var.get()
 #                 }
                 
-#                 # Validate required fields
-#                 required_fields = ['Company', 'Type', 'Color', 'size']
+#                 # 🆕 Validate required fields and check for placeholders
+#                 required_fields = ['Company', 'Color', 'Size', 'Type']
+#                 placeholder_texts = {
+#                     'Company': 'e.g., Diamond, Metro, Sapphire',
+#                     'Color': 'e.g., Silver, Golden, Wooden',
+#                     'Size': 'e.g., 8x4, 10x3, 12x4',
+#                     'Type': 'e.g., Glossy, Matte, Textured'
+#                 }
+                
 #                 for field in required_fields:
-#                     if not self.entries[field].get().strip():
-#                         messagebox.showerror("Error", f"{field} is required!")
+#                     value = self.entries[field].get().strip()
+#                     if not value or value == placeholder_texts[field]:
+#                         messagebox.showerror("Error", f"Please enter a valid {field}!")
+#                         self.entries[field].focus()
 #                         return
                 
+#                 # Validate prices and stock
+#                 if product_data['purchase_price'] <= 0:
+#                     messagebox.showerror("Error", "Purchase price must be greater than 0!")
+#                     self.entries['Purchase Price'].focus()
+#                     return
+                
+#                 if product_data['sale_price'] <= 0:
+#                     messagebox.showerror("Error", "Sale price must be greater than 0!")
+#                     self.entries['Sale Price'].focus()
+#                     return
+                
+#                 if product_data['current_stock'] < 0:
+#                     messagebox.showerror("Error", "Stock quantity cannot be negative!")
+#                     self.entries['Stock'].focus()
+#                     return
+                
 #                 self.db.add_product(product_data)
-#                 messagebox.showinfo("Success", "Roof Sheet product added successfully!")
+#                 messagebox.showinfo("Success", "Limination Sheet product added successfully!")
 #                 self.dialog.destroy()
 #                 self.refresh_callback()
                 
@@ -204,22 +237,21 @@
 #                 messagebox.showerror("Error", "Please enter valid numbers for price and stock!")
 #             except Exception as e:
 #                 messagebox.showerror("Error", f"Failed to add product: {str(e)}")
-        
 #         save_btn = tk.Button(
 #             button_frame,
 #             text="Save Product",
-#             font=('Arial', 11, 'bold'),  # 🆕 Smaller font
+#             font=('Arial', 11, 'bold'),
 #             bg='#27ae60',
 #             fg='white',
 #             relief='flat',
 #             command=save_product
 #         )
-#         save_btn.pack(side=tk.RIGHT, padx=(8, 0))  # 🆕 Smaller padding
+#         save_btn.pack(side=tk.RIGHT, padx=(8, 0))
         
 #         cancel_btn = tk.Button(
 #             button_frame,
 #             text="Cancel",
-#             font=('Arial', 11),  # 🆕 Smaller font
+#             font=('Arial', 11),
 #             bg='#95a5a6',
 #             fg='white',
 #             relief='flat',
@@ -230,7 +262,7 @@
 #         # Set focus to first field
 #         self.entries['Company'].focus()
         
-#         # 🆕 Bind Enter key to save
+#         # Bind Enter key to save
 #         self.dialog.bind('<Return>', lambda e: save_product())
     
 #     def validate_number(self, value):
@@ -248,8 +280,8 @@ from backend.product_service import ProductService  # ✅ ADD THIS
 from PIL import Image, ImageTk
 import os
 
-class RoofSheetForm:
-    def __init__(self, parent, product_service, current_category, refresh_callback):  # ✅ CHANGED: product_service instead of db
+class LiminationSheetForm:
+    def __init__(self, parent, product_service, current_category, refresh_callback):  # ✅ CHANGED
         self.parent = parent
         self.product_service = product_service  # ✅ CHANGED
         self.current_category = current_category
@@ -257,9 +289,9 @@ class RoofSheetForm:
         self.setup_form()
     
     def setup_form(self):
-        """Setup the roof sheet form"""
+        """Setup the limination sheet form"""
         self.dialog = tk.Toplevel(self.parent)
-        self.dialog.title("Add Roof Sheet Product")
+        self.dialog.title("Add Limination Sheet Product")
         self.dialog.geometry("450x550")
         self.dialog.configure(bg='white')
         self.dialog.transient(self.parent)
@@ -313,7 +345,7 @@ class RoofSheetForm:
         # Form Title
         tk.Label(
             self.scrollable_frame,
-            text="Add Roof Sheet Product",
+            text="Add Limination Sheet Product",
             font=('Arial', 16, 'bold'),
             fg='#2c3e50',
             bg='white'
@@ -363,12 +395,12 @@ class RoofSheetForm:
         )
         browse_btn.pack(side=tk.RIGHT)
         
-        # Roof Sheet Specific Fields
+        # Limination Sheet Specific Fields
         fields = [
             ("Company", "text", "e.g., Diamond, Metro, Sapphire"),
-            ("Type", "text", "e.g., Corrugated, Plain, Color Coated"),
-            ("Color", "text", "e.g., Silver, Red, Blue"),
+            ("Color", "text", "e.g., Silver, Golden, Wooden"),
             ("Size", "text", "e.g., 8x4, 10x3, 12x4"),
+            ("Type", "text", "e.g., Glossy, Matte, Textured"),
             ("Purchase Price", "number", "0"),
             ("Sale Price", "number", "0"),
             ("Stock", "number", "0")
@@ -413,7 +445,7 @@ class RoofSheetForm:
         
         def save_product():
             try:
-                # 🏗️ Map roof sheet fields to database columns
+                # 🏗️ Map limination sheet fields to database columns
                 product_data = {
                     'category_id': self.current_category,
                     'company': self.entries['Company'].get().strip(),
@@ -421,19 +453,19 @@ class RoofSheetForm:
                     'color': self.entries['Color'].get().strip(),
                     'sale_price': float(self.entries['Sale Price'].get() or 0),
                     'purchase_price': float(self.entries['Purchase Price'].get() or 0),
-                    'packing': "",  # Not used for roof sheets
+                    'packing': "",  # Not used for limination sheets
                     'volume': self.entries['Size'].get().strip(),  # Using 'volume' column for size
                     'current_stock': int(self.entries['Stock'].get() or 0),
                     'image_path': self.image_path_var.get()
                 }
                 
                 # Validate required fields and check for placeholders
-                required_fields = ['Company', 'Type', 'Color', 'Size']
+                required_fields = ['Company', 'Color', 'Size', 'Type']
                 placeholder_texts = {
                     'Company': 'e.g., Diamond, Metro, Sapphire',
-                    'Type': 'e.g., Corrugated, Plain, Color Coated',
-                    'Color': 'e.g., Silver, Red, Blue',
-                    'Size': 'e.g., 8x4, 10x3, 12x4'
+                    'Color': 'e.g., Silver, Golden, Wooden',
+                    'Size': 'e.g., 8x4, 10x3, 12x4',
+                    'Type': 'e.g., Glossy, Matte, Textured'
                 }
                 
                 for field in required_fields:
@@ -461,7 +493,7 @@ class RoofSheetForm:
                 
                 # ✅ CHANGED: Use product_service instead of db
                 self.product_service.add_product(product_data)
-                messagebox.showinfo("Success", "Roof Sheet product added successfully!")
+                messagebox.showinfo("Success", "Limination Sheet product added successfully!")
                 self.dialog.destroy()
                 self.refresh_callback()
                 

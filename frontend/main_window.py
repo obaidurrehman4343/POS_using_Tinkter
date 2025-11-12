@@ -1,17 +1,13 @@
-# import tkinter as tk
 from frontend.dashboard import Dashboard
 from frontend.inventory_management import InventoryManagement
 from frontend.sale_pos import SalePOS
+from frontend.sale_management import SaleManagement  # Add this import
 from frontend.stock_report import StockReport
 from frontend.settings import Settings
 import tkinter as tk
 
 class MainWindow:
     def __init__(self, root, login_root=None):
-        """
-        root: Toplevel window for MainWindow
-        login_root: original login Tk() window (for logout)
-        """
         self.root = root
         self.login_root = login_root
         self.root.title("Awan Hardware POS")
@@ -37,27 +33,6 @@ class MainWindow:
 
         # Initially empty content
         self.show_empty_content()
-
-    def show_empty_content(self):
-        self.clear_content()
-        empty_frame = tk.Frame(self.content_area, bg='white')
-        empty_frame.pack(fill=tk.BOTH, expand=True)
-
-        tk.Label(
-            empty_frame,
-            text="🚀 Welcome to Awan Hardware POS",
-            font=('Arial', 24, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(pady=(100, 20))
-
-        tk.Label(
-            empty_frame,
-            text="Select a section from the sidebar to get started",
-            font=('Arial', 14),
-            fg='#7f8c8d',
-            bg='white'
-        ).pack(pady=10)
 
     def create_sidebar(self, parent):
         sidebar = tk.Frame(parent, bg='#2c3e50', width=250)
@@ -99,8 +74,9 @@ class MainWindow:
         # Menu buttons
         self.dashboard_btn = self.create_menu_button(menu_frame, "📊 Dashboard", self.show_dashboard)
         self.inventory_btn = self.create_menu_button(menu_frame, "📦 Inventory Management", self.show_inventory)
-        self.sales_btn = self.create_menu_button(menu_frame, "💰 Sale & POS", self.show_sales)
-        self.stock_report_btn = self.create_menu_button(menu_frame, "📈 Stock Report", self.show_stock_report)
+        self.sales_btn = self.create_menu_button(menu_frame, "💰 Point of Sale", self.show_sales)
+        self.sale_mgmt_btn = self.create_menu_button(menu_frame, "📈 Sale Management", self.show_sale_management)  # Add this
+        self.stock_report_btn = self.create_menu_button(menu_frame, "📊 Stock Report", self.show_stock_report)
 
         # Footer
         footer_frame = tk.Frame(sidebar, bg='#34495e')
@@ -173,7 +149,7 @@ class MainWindow:
         return btn
 
     def update_button_style(self, active_button):
-        buttons = [self.dashboard_btn, self.inventory_btn, self.sales_btn, self.stock_report_btn]
+        buttons = [self.dashboard_btn, self.inventory_btn, self.sales_btn, self.sale_mgmt_btn, self.stock_report_btn]
         for b in buttons:
             b.config(bg='#2c3e50', fg='#bdc3c7')
         if active_button:
@@ -188,15 +164,33 @@ class MainWindow:
     def show_dashboard(self): Dashboard(self.content_area)
     def show_inventory(self): InventoryManagement(self.content_area)
     def show_sales(self): SalePOS(self.content_area)
+    def show_sale_management(self): SaleManagement(self.content_area)  # Add this
     def show_stock_report(self): StockReport(self.content_area)
     def show_settings(self): Settings(self.content_area)
+    def show_empty_content(self):
+        self.clear_content()
+        empty_frame = tk.Frame(self.content_area, bg='white')
+        empty_frame.pack(fill=tk.BOTH, expand=True)
 
-    # Logout method
+        tk.Label(
+            empty_frame,
+            text="🚀 Welcome to Awan Hardware POS",
+            font=('Arial', 24, 'bold'),
+            fg='#2c3e50',
+            bg='white'
+        ).pack(pady=(100, 20))
+
+        tk.Label(
+            empty_frame,
+            text="Select a section from the sidebar to get started",
+            font=('Arial', 14),
+            fg='#7f8c8d',
+            bg='white'
+        ).pack(pady=10)
+
     def logout(self):
         try:
-            # Close main window
             self.root.destroy()
-            # Show login window again
             if self.login_root and self.login_root.winfo_exists():
                 self.login_root.deiconify()
         except Exception as e:
