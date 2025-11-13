@@ -5,7 +5,7 @@ from frontend.sale_management import SaleManagement  # Add this import
 from frontend.stock_report import StockReport
 from frontend.settings import Settings
 import tkinter as tk
-
+from frontend.stock_report import StockReport
 class MainWindow:
     def __init__(self, root, login_root=None):
         self.root = root

@@ -1,14 +1,10 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from backend.product_service import ProductService
 from backend.category_service import CategoryService
 from PIL import Image, ImageTk
 import os
-from frontend.roof_sheet import RoofSheetForm
-from frontend.limination_sheet import LiminationSheetForm
-from frontend.sanitary import SanitaryForm
-from frontend.paint_form import PaintForm
+from frontend.category_form import UniversalProductForm  # ADD THIS IMPORT
 
 class InventoryManagement:
     def __init__(self, parent):
@@ -131,7 +127,7 @@ class InventoryManagement:
             messagebox.showerror("Error", f"Failed to load categories: {str(e)}")
 
     def on_category_select(self, event=None):
-        """Handle category selection"""
+        """Handle category selection - FIXED METHOD NAME"""
         category_name = self.category_var.get()
         if category_name:
             self.selected_category_name = category_name
@@ -142,7 +138,7 @@ class InventoryManagement:
                 if category_id:
                     self.current_category = category_id
                     self.add_product_btn.config(state='normal')
-                    self.load_products(category_id)
+                    self.load_products(category_id)  # ✅ CORRECT METHOD NAME
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load category: {str(e)}")
         else:
@@ -308,7 +304,7 @@ class InventoryManagement:
         name_entry.focus()
 
     def add_product(self):
-        """Add new product based on category"""
+        """Add new product using universal form - FIXED METHOD"""
         if not self.current_category:
             messagebox.showwarning("Warning", "Please select a category first!")
             return
@@ -321,43 +317,20 @@ class InventoryManagement:
                     category_name = cat[1]
                     break
             
-            # Open product form based on category
-            if category_name.lower() == 'paint':
-                PaintForm(
-                    parent=self.parent,
-                    product_service=self.product_service,
-                    current_category=self.current_category,
-                    refresh_callback=lambda: self.load_products(self.current_category)
-                )
-            elif category_name.lower() == 'roof sheet':
-                RoofSheetForm(
-                    parent=self.parent,
-                    product_service=self.product_service,
-                    current_category=self.current_category,
-                    refresh_callback=lambda: self.load_products(self.current_category)
-                )
-            elif category_name.lower() == 'limination sheet':
-                LiminationSheetForm(
-                    parent=self.parent,
-                    product_service=self.product_service,
-                    current_category=self.current_category,
-                    refresh_callback=lambda: self.load_products(self.current_category)
-                )
-            elif category_name.lower() == 'sanitary':
-                SanitaryForm(
-                    parent=self.parent,
-                    product_service=self.product_service,
-                    current_category=self.current_category,
-                    refresh_callback=lambda: self.load_products(self.current_category)
-                )
-            else:
-                self.open_generic_form(category_name)
+            # Use Universal Form for ALL categories
+            UniversalProductForm(
+                parent=self.parent,
+                product_service=self.product_service,
+                current_category=self.current_category,
+                refresh_callback=lambda: self.load_products(self.current_category),  # ✅ CORRECT METHOD NAME
+                category_name=category_name
+            )
                 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add product: {str(e)}")
     
     def load_products(self, category_id):
-        """Load products for selected category"""
+        """Load products for selected category - FIXED METHOD NAME"""
         # Clear existing content
         for widget in self.products_container.winfo_children():
             widget.destroy()
@@ -662,7 +635,7 @@ class InventoryManagement:
         return card_frame
     
     def edit_product(self, product_id):
-        """Edit product functionality"""
+        """Edit product using universal form - FIXED METHOD"""
         try:
             # Get product data from database
             products = self.product_service.get_all_products()
@@ -671,7 +644,7 @@ class InventoryManagement:
             
             for product in products:
                 if product[0] == product_id:
-                    product_data = product
+                    product_data = self.unpack_product_data(product)
                     category_name = product[-1] if len(product) > 13 else ""
                     break
             
@@ -679,22 +652,36 @@ class InventoryManagement:
                 messagebox.showerror("Error", "Product not found!")
                 return
             
-            # Unpack product data based on schema
-            if len(product_data) == 14:  # New schema with color
-                (pid, category_id, company, ptype, color,
+            # Use Universal Form for editing ALL categories
+            UniversalProductForm(
+                parent=self.parent,
+                product_service=self.product_service,
+                current_category=self.current_category,
+                refresh_callback=lambda: self.load_products(self.current_category),  # ✅ CORRECT METHOD NAME
+                category_name=category_name,
+                product_id=product_id,
+                product_data=product_data
+            )
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to edit product: {str(e)}")
+
+    def unpack_product_data(self, product):
+        """Helper to unpack product data for editing"""
+        try:
+            if len(product) == 14:  # New schema with color
+                (product_id, category_id, company, ptype, color,
                  sale_price, purchase_price, packing, volume, current_stock, 
-                 image_path, created_at, updated_at, category_name) = product_data
-            elif len(product_data) == 13:  # Schema without color
-                (pid, category_id, company, ptype, 
+                 image_path, created_at, updated_at, category_name) = product
+            elif len(product) == 13:  # Schema without color
+                (product_id, category_id, company, ptype, 
                  sale_price, purchase_price, packing, volume, current_stock, 
-                 image_path, created_at, updated_at, category_name) = product_data
+                 image_path, created_at, updated_at, category_name) = product
                 color = "N/A"
             else:
-                messagebox.showerror("Error", "Cannot edit this product format")
-                return
+                return None
             
-            # Prepare product data dictionary
-            product_dict = {
+            return {
                 'category_id': category_id,
                 'company': company,
                 'type': ptype,
@@ -704,24 +691,11 @@ class InventoryManagement:
                 'packing': packing,
                 'volume': volume,
                 'current_stock': current_stock,
-                'image_path': image_path,
-                'category_id': category_id
+                'image_path': image_path
             }
-            
-            # Open appropriate edit dialog based on category
-            if category_name and category_name.lower() == 'paint':
-                self.open_paint_edit_dialog(product_id, product_dict)
-            elif category_name and category_name.lower() == 'roof sheet':
-                self.open_roof_sheet_edit_dialog(product_id, product_dict)
-            elif category_name and category_name.lower() == 'limination sheet':
-                self.open_limination_sheet_edit_dialog(product_id, product_dict)
-            elif category_name and category_name.lower() == 'sanitary':
-                self.open_sanitary_edit_dialog(product_id, product_dict)
-            else:
-                self.open_generic_edit_dialog(product_id, product_dict)
-                
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to edit product: {str(e)}")
+            print(f"Error unpacking product: {e}")
+            return None
 
     def delete_product(self, product_id):
         """Delete product functionality"""
@@ -734,1132 +708,11 @@ class InventoryManagement:
                 deleted_count = self.product_service.delete_product(product_id)
                 if deleted_count > 0:
                     messagebox.showinfo("Success", "Product deleted successfully!")
-                    self.load_products(self.current_category)
+                    self.load_products(self.current_category)  # ✅ CORRECT METHOD NAME
                 else:
                     messagebox.showerror("Error", "Failed to delete product!")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to delete product: {str(e)}")
-
-    def open_generic_form(self, category_name):
-        """Open product form for other categories"""
-        messagebox.showinfo("Info", f"Add product form for {category_name} category")
-
-    def open_paint_edit_dialog(self, product_id, product_data):
-        """Open paint specific edit dialog"""
-        dialog = tk.Toplevel(self.parent)
-        dialog.title("Edit Paint Product")
-        dialog.geometry("450x550")
-        dialog.configure(bg='white')
-        dialog.transient(self.parent)
-        dialog.grab_set()
-        
-        # Position within dashboard boundaries
-        self.parent.update_idletasks()
-        parent_x = self.parent.winfo_x()
-        parent_y = self.parent.winfo_y()
-        parent_width = self.parent.winfo_width()
-        parent_height = self.parent.winfo_height()
-        
-        form_width = 450
-        form_height = 550
-        x = parent_x + parent_width - form_width - 20
-        y = parent_y + 100
-        
-        screen_width = self.parent.winfo_screenwidth()
-        screen_height = self.parent.winfo_screenheight()
-        
-        if x + form_width > screen_width:
-            x = screen_width - form_width - 20
-        
-        if y + form_height > screen_height:
-            y = screen_height - form_height - 20
-        
-        dialog.geometry(f"{form_width}x{form_height}+{x}+{y}")
-        
-        # Create scrollable form
-        canvas = tk.Canvas(dialog, bg='white', highlightthickness=0)
-        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg='white')
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Form Title
-        tk.Label(
-            scrollable_frame,
-            text="Edit Paint Product",
-            font=('Arial', 16, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(anchor='w', pady=(0, 15))
-        
-        # Image Upload Section
-        image_frame = tk.Frame(scrollable_frame, bg='white')
-        image_frame.pack(fill=tk.X, pady=8)
-        
-        tk.Label(
-            image_frame,
-            text="Product Image:",
-            font=('Arial', 10, 'bold'),
-            fg='#2c3e50',
-            bg='white',
-            width=12,
-            anchor='w'
-        ).pack(side=tk.LEFT)
-        
-        image_path_var = tk.StringVar(value=product_data.get('image_path', ''))
-        image_entry = tk.Entry(
-            image_frame, 
-            textvariable=image_path_var,
-            font=('Arial', 10),
-            relief='solid', 
-            bd=1,
-            state='readonly'
-        )
-        image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))
-        
-        def browse_image():
-            file_path = filedialog.askopenfilename(
-                title="Select Product Image",
-                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
-            )
-            if file_path:
-                image_path_var.set(file_path)
-        
-        browse_btn = tk.Button(
-            image_frame,
-            text="Browse",
-            font=('Arial', 9),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=browse_image
-        )
-        browse_btn.pack(side=tk.RIGHT)
-        
-        # Paint Specific Fields
-        fields = [
-            ("Company", "text", product_data.get('company', '')),
-            ("Type", "text", product_data.get('type', '')),
-            ("Color", "text", product_data.get('color', '')),
-            ("Packing", "text", product_data.get('packing', '')),
-            ("Volume", "text", product_data.get('volume', '')),
-            ("Purchase Price", "number", product_data.get('purchase_price', 0)),
-            ("Sale Price", "number", product_data.get('sale_price', 0)),
-            ("Stock", "number", product_data.get('current_stock', 0))
-        ]
-        
-        entries = {}
-        
-        for field_name, field_type, default_value in fields:
-            frame = tk.Frame(scrollable_frame, bg='white')
-            frame.pack(fill=tk.X, pady=6)
-            
-            tk.Label(
-                frame,
-                text=f"{field_name}:",
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white',
-                width=12,
-                anchor='w'
-            ).pack(side=tk.LEFT)
-            
-            if field_type == 'number':
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')
-                entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
-            else:
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)
-            
-            # Set default value
-            entry.insert(0, str(default_value))
-            
-            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)
-            entries[field_name] = entry
-        
-        # Buttons
-        button_frame = tk.Frame(scrollable_frame, bg='white')
-        button_frame.pack(fill=tk.X, pady=15)
-        
-        def update_product():
-            try:
-                updated_data = {
-                    'category_id': product_data.get('category_id'),
-                    'company': entries['Company'].get().strip(),
-                    'type': entries['Type'].get().strip(),
-                    'color': entries['Color'].get().strip(),
-                    'sale_price': float(entries['Sale Price'].get() or 0),
-                    'purchase_price': float(entries['Purchase Price'].get() or 0),
-                    'packing': entries['Packing'].get().strip(),
-                    'volume': entries['Volume'].get().strip(),
-                    'current_stock': int(entries['Stock'].get() or 0),
-                    'image_path': image_path_var.get()
-                }
-                
-                # Validate required fields
-                required_fields = ['Company', 'Type', 'Color', 'Packing']
-                for field in required_fields:
-                    if not entries[field].get().strip():
-                        messagebox.showerror("Error", f"{field} is required!")
-                        return
-                
-                # Validate prices and stock
-                if updated_data['purchase_price'] <= 0:
-                    messagebox.showerror("Error", "Purchase price must be greater than 0!")
-                    entries['Purchase Price'].focus()
-                    return
-                
-                if updated_data['sale_price'] <= 0:
-                    messagebox.showerror("Error", "Sale price must be greater than 0!")
-                    entries['Sale Price'].focus()
-                    return
-                
-                if updated_data['current_stock'] < 0:
-                    messagebox.showerror("Error", "Stock quantity cannot be negative!")
-                    entries['Stock'].focus()
-                    return
-                
-                # Use product service to update
-                updated_count = self.product_service.update_product(product_id, updated_data)
-                
-                if updated_count > 0:
-                    messagebox.showinfo("Success", "Paint product updated successfully!")
-                    dialog.destroy()
-                    self.load_products(self.current_category)
-                else:
-                    messagebox.showerror("Error", "Failed to update paint product!")
-                    
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to update paint product: {str(e)}")
-        
-        update_btn = tk.Button(
-            button_frame,
-            text="Update Paint",
-            font=('Arial', 11, 'bold'),
-            bg='#3498db',
-            fg='white',
-            relief='flat',
-            command=update_product
-        )
-        update_btn.pack(side=tk.RIGHT, padx=(8, 0))
-        
-        cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
-            font=('Arial', 11),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=dialog.destroy
-        )
-        cancel_btn.pack(side=tk.RIGHT)
-        
-        # Set focus to first field
-        entries['Company'].focus()
-        dialog.bind('<Return>', lambda e: update_product())
-
-    def open_roof_sheet_edit_dialog(self, product_id, product_data):
-        """Open roof sheet specific edit dialog"""
-        dialog = tk.Toplevel(self.parent)
-        dialog.title("Edit Roof Sheet Product")
-        dialog.geometry("450x550")
-        dialog.configure(bg='white')
-        dialog.transient(self.parent)
-        dialog.grab_set()
-        
-        # Position within dashboard boundaries
-        self.parent.update_idletasks()
-        parent_x = self.parent.winfo_x()
-        parent_y = self.parent.winfo_y()
-        parent_width = self.parent.winfo_width()
-        parent_height = self.parent.winfo_height()
-        
-        form_width = 450
-        form_height = 550
-        x = parent_x + parent_width - form_width - 20
-        y = parent_y + 100
-        
-        screen_width = self.parent.winfo_screenwidth()
-        screen_height = self.parent.winfo_screenheight()
-        
-        if x + form_width > screen_width:
-            x = screen_width - form_width - 20
-        
-        if y + form_height > screen_height:
-            y = screen_height - form_height - 20
-        
-        dialog.geometry(f"{form_width}x{form_height}+{x}+{y}")
-        
-        # Create scrollable form
-        canvas = tk.Canvas(dialog, bg='white', highlightthickness=0)
-        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg='white')
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Form Title
-        tk.Label(
-            scrollable_frame,
-            text="Edit Roof Sheet Product",
-            font=('Arial', 16, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(anchor='w', pady=(0, 15))
-        
-        # Image Upload Section
-        image_frame = tk.Frame(scrollable_frame, bg='white')
-        image_frame.pack(fill=tk.X, pady=8)
-        
-        tk.Label(
-            image_frame,
-            text="Product Image:",
-            font=('Arial', 10, 'bold'),
-            fg='#2c3e50',
-            bg='white',
-            width=12,
-            anchor='w'
-        ).pack(side=tk.LEFT)
-        
-        image_path_var = tk.StringVar(value=product_data.get('image_path', ''))
-        image_entry = tk.Entry(
-            image_frame, 
-            textvariable=image_path_var,
-            font=('Arial', 10),
-            relief='solid', 
-            bd=1,
-            state='readonly'
-        )
-        image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))
-        
-        def browse_image():
-            file_path = filedialog.askopenfilename(
-                title="Select Product Image",
-                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
-            )
-            if file_path:
-                image_path_var.set(file_path)
-        
-        browse_btn = tk.Button(
-            image_frame,
-            text="Browse",
-            font=('Arial', 9),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=browse_image
-        )
-        browse_btn.pack(side=tk.RIGHT)
-        
-        # Roof Sheet Specific Fields - WITH SIZE FIELD
-        fields = [
-            ("Company", "text", product_data.get('company', '')),
-            ("Type", "text", product_data.get('type', '')),
-            ("Color", "text", product_data.get('color', '')),
-            ("Size", "text", product_data.get('volume', '')),
-            ("Purchase Price", "number", product_data.get('purchase_price', 0)),
-            ("Sale Price", "number", product_data.get('sale_price', 0)),
-            ("Stock", "number", product_data.get('current_stock', 0))
-        ]
-        
-        entries = {}
-        
-        for field_name, field_type, default_value in fields:
-            frame = tk.Frame(scrollable_frame, bg='white')
-            frame.pack(fill=tk.X, pady=6)
-            
-            tk.Label(
-                frame,
-                text=f"{field_name}:",
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white',
-                width=12,
-                anchor='w'
-            ).pack(side=tk.LEFT)
-            
-            if field_type == 'number':
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')
-                entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
-            else:
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)
-            
-            # Set default value
-            entry.insert(0, str(default_value))
-            
-            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)
-            entries[field_name] = entry
-        
-        # Buttons
-        button_frame = tk.Frame(scrollable_frame, bg='white')
-        button_frame.pack(fill=tk.X, pady=15)
-        
-        def update_product():
-            try:
-                updated_data = {
-                    'category_id': product_data.get('category_id'),
-                    'company': entries['Company'].get().strip(),
-                    'type': entries['Type'].get().strip(),
-                    'color': entries['Color'].get().strip(),
-                    'sale_price': float(entries['Sale Price'].get() or 0),
-                    'purchase_price': float(entries['Purchase Price'].get() or 0),
-                    'packing': "",
-                    'volume': entries['Size'].get().strip(),
-                    'current_stock': int(entries['Stock'].get() or 0),
-                    'image_path': image_path_var.get()
-                }
-                
-                # Validate required fields
-                required_fields = ['Company', 'Type', 'Color', 'Size']
-                for field in required_fields:
-                    if not entries[field].get().strip():
-                        messagebox.showerror("Error", f"{field} is required!")
-                        return
-                
-                # Validate prices and stock
-                if updated_data['purchase_price'] <= 0:
-                    messagebox.showerror("Error", "Purchase price must be greater than 0!")
-                    entries['Purchase Price'].focus()
-                    return
-                
-                if updated_data['sale_price'] <= 0:
-                    messagebox.showerror("Error", "Sale price must be greater than 0!")
-                    entries['Sale Price'].focus()
-                    return
-                
-                if updated_data['current_stock'] < 0:
-                    messagebox.showerror("Error", "Stock quantity cannot be negative!")
-                    entries['Stock'].focus()
-                    return
-                
-                # Use product service to update
-                updated_count = self.product_service.update_product(product_id, updated_data)
-                
-                if updated_count > 0:
-                    messagebox.showinfo("Success", "Roof Sheet updated successfully!")
-                    dialog.destroy()
-                    self.load_products(self.current_category)
-                else:
-                    messagebox.showerror("Error", "Failed to update roof sheet!")
-                    
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to update roof sheet: {str(e)}")
-        
-        update_btn = tk.Button(
-            button_frame,
-            text="Update Roof Sheet",
-            font=('Arial', 11, 'bold'),
-            bg='#3498db',
-            fg='white',
-            relief='flat',
-            command=update_product
-        )
-        update_btn.pack(side=tk.RIGHT, padx=(8, 0))
-        
-        cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
-            font=('Arial', 11),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=dialog.destroy
-        )
-        cancel_btn.pack(side=tk.RIGHT)
-        
-        # Set focus to first field
-        entries['Company'].focus()
-        dialog.bind('<Return>', lambda e: update_product())
-
-    def open_limination_sheet_edit_dialog(self, product_id, product_data):
-        """Open limination sheet specific edit dialog"""
-        dialog = tk.Toplevel(self.parent)
-        dialog.title("Edit Limination Sheet Product")
-        dialog.geometry("450x550")
-        dialog.configure(bg='white')
-        dialog.transient(self.parent)
-        dialog.grab_set()
-        
-        # Position within dashboard boundaries
-        self.parent.update_idletasks()
-        parent_x = self.parent.winfo_x()
-        parent_y = self.parent.winfo_y()
-        parent_width = self.parent.winfo_width()
-        parent_height = self.parent.winfo_height()
-        
-        form_width = 450
-        form_height = 550
-        x = parent_x + parent_width - form_width - 20
-        y = parent_y + 100
-        
-        screen_width = self.parent.winfo_screenwidth()
-        screen_height = self.parent.winfo_screenheight()
-        
-        if x + form_width > screen_width:
-            x = screen_width - form_width - 20
-        
-        if y + form_height > screen_height:
-            y = screen_height - form_height - 20
-        
-        dialog.geometry(f"{form_width}x{form_height}+{x}+{y}")
-        
-        # Create scrollable form
-        canvas = tk.Canvas(dialog, bg='white', highlightthickness=0)
-        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg='white')
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Form Title
-        tk.Label(
-            scrollable_frame,
-            text="Edit Limination Sheet Product",
-            font=('Arial', 16, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(anchor='w', pady=(0, 15))
-        
-        # Image Upload Section
-        image_frame = tk.Frame(scrollable_frame, bg='white')
-        image_frame.pack(fill=tk.X, pady=8)
-        
-        tk.Label(
-            image_frame,
-            text="Product Image:",
-            font=('Arial', 10, 'bold'),
-            fg='#2c3e50',
-            bg='white',
-            width=12,
-            anchor='w'
-        ).pack(side=tk.LEFT)
-        
-        image_path_var = tk.StringVar(value=product_data.get('image_path', ''))
-        image_entry = tk.Entry(
-            image_frame, 
-            textvariable=image_path_var,
-            font=('Arial', 10),
-            relief='solid', 
-            bd=1,
-            state='readonly'
-        )
-        image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))
-        
-        def browse_image():
-            file_path = filedialog.askopenfilename(
-                title="Select Product Image",
-                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
-            )
-            if file_path:
-                image_path_var.set(file_path)
-        
-        browse_btn = tk.Button(
-            image_frame,
-            text="Browse",
-            font=('Arial', 9),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=browse_image
-        )
-        browse_btn.pack(side=tk.RIGHT)
-        
-        # Limination Sheet Specific Fields
-        fields = [
-            ("Company", "text", product_data.get('company', '')),
-            ("Color", "text", product_data.get('color', '')),
-            ("Size", "text", product_data.get('volume', '')),
-            ("Type", "text", product_data.get('type', '')),
-            ("Purchase Price", "number", product_data.get('purchase_price', 0)),
-            ("Sale Price", "number", product_data.get('sale_price', 0)),
-            ("Stock", "number", product_data.get('current_stock', 0))
-        ]
-        
-        entries = {}
-        
-        for field_name, field_type, default_value in fields:
-            frame = tk.Frame(scrollable_frame, bg='white')
-            frame.pack(fill=tk.X, pady=6)
-            
-            tk.Label(
-                frame,
-                text=f"{field_name}:",
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white',
-                width=12,
-                anchor='w'
-            ).pack(side=tk.LEFT)
-            
-            if field_type == 'number':
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')
-                entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
-            else:
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)
-            
-            # Set default value
-            entry.insert(0, str(default_value))
-            
-            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)
-            entries[field_name] = entry
-        
-        # Buttons
-        button_frame = tk.Frame(scrollable_frame, bg='white')
-        button_frame.pack(fill=tk.X, pady=15)
-        
-        def update_product():
-            try:
-                updated_data = {
-                    'category_id': product_data.get('category_id'),
-                    'company': entries['Company'].get().strip(),
-                    'type': entries['Type'].get().strip(),
-                    'color': entries['Color'].get().strip(),
-                    'sale_price': float(entries['Sale Price'].get() or 0),
-                    'purchase_price': float(entries['Purchase Price'].get() or 0),
-                    'packing': "",
-                    'volume': entries['Size'].get().strip(),
-                    'current_stock': int(entries['Stock'].get() or 0),
-                    'image_path': image_path_var.get()
-                }
-                
-                # Validate required fields
-                required_fields = ['Company', 'Color', 'Size', 'Type']
-                for field in required_fields:
-                    if not entries[field].get().strip():
-                        messagebox.showerror("Error", f"{field} is required!")
-                        return
-                
-                # Validate prices and stock
-                if updated_data['purchase_price'] <= 0:
-                    messagebox.showerror("Error", "Purchase price must be greater than 0!")
-                    entries['Purchase Price'].focus()
-                    return
-                
-                if updated_data['sale_price'] <= 0:
-                    messagebox.showerror("Error", "Sale price must be greater than 0!")
-                    entries['Sale Price'].focus()
-                    return
-                
-                if updated_data['current_stock'] < 0:
-                    messagebox.showerror("Error", "Stock quantity cannot be negative!")
-                    entries['Stock'].focus()
-                    return
-                
-                # Use product service to update
-                updated_count = self.product_service.update_product(product_id, updated_data)
-                
-                if updated_count > 0:
-                    messagebox.showinfo("Success", "Limination Sheet updated successfully!")
-                    dialog.destroy()
-                    self.load_products(self.current_category)
-                else:
-                    messagebox.showerror("Error", "Failed to update limination sheet!")
-                    
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to update limination sheet: {str(e)}")
-        
-        update_btn = tk.Button(
-            button_frame,
-            text="Update Limination Sheet",
-            font=('Arial', 11, 'bold'),
-            bg='#3498db',
-            fg='white',
-            relief='flat',
-            command=update_product
-        )
-        update_btn.pack(side=tk.RIGHT, padx=(8, 0))
-        
-        cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
-            font=('Arial', 11),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=dialog.destroy
-        )
-        cancel_btn.pack(side=tk.RIGHT)
-        
-        # Set focus to first field
-        entries['Company'].focus()
-        dialog.bind('<Return>', lambda e: update_product())
-
-    def open_sanitary_edit_dialog(self, product_id, product_data):
-        """Open sanitary specific edit dialog"""
-        dialog = tk.Toplevel(self.parent)
-        dialog.title("Edit Sanitary Product")
-        dialog.geometry("450x550")
-        dialog.configure(bg='white')
-        dialog.transient(self.parent)
-        dialog.grab_set()
-        
-        # Position within dashboard boundaries
-        self.parent.update_idletasks()
-        parent_x = self.parent.winfo_x()
-        parent_y = self.parent.winfo_y()
-        parent_width = self.parent.winfo_width()
-        parent_height = self.parent.winfo_height()
-        
-        form_width = 450
-        form_height = 550
-        x = parent_x + parent_width - form_width - 20
-        y = parent_y + 100
-        
-        screen_width = self.parent.winfo_screenwidth()
-        screen_height = self.parent.winfo_screenheight()
-        
-        if x + form_width > screen_width:
-            x = screen_width - form_width - 20
-        
-        if y + form_height > screen_height:
-            y = screen_height - form_height - 20
-        
-        dialog.geometry(f"{form_width}x{form_height}+{x}+{y}")
-        
-        # Create scrollable form
-        canvas = tk.Canvas(dialog, bg='white', highlightthickness=0)
-        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg='white')
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Form Title
-        tk.Label(
-            scrollable_frame,
-            text="Edit Sanitary Product",
-            font=('Arial', 16, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(anchor='w', pady=(0, 15))
-        
-        # Image Upload Section
-        image_frame = tk.Frame(scrollable_frame, bg='white')
-        image_frame.pack(fill=tk.X, pady=8)
-        
-        tk.Label(
-            image_frame,
-            text="Product Image:",
-            font=('Arial', 10, 'bold'),
-            fg='#2c3e50',
-            bg='white',
-            width=12,
-            anchor='w'
-        ).pack(side=tk.LEFT)
-        
-        image_path_var = tk.StringVar(value=product_data.get('image_path', ''))
-        image_entry = tk.Entry(
-            image_frame, 
-            textvariable=image_path_var,
-            font=('Arial', 10),
-            relief='solid', 
-            bd=1,
-            state='readonly'
-        )
-        image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))
-        
-        def browse_image():
-            file_path = filedialog.askopenfilename(
-                title="Select Product Image",
-                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
-            )
-            if file_path:
-                image_path_var.set(file_path)
-        
-        browse_btn = tk.Button(
-            image_frame,
-            text="Browse",
-            font=('Arial', 9),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=browse_image
-        )
-        browse_btn.pack(side=tk.RIGHT)
-        
-        # Sanitary Specific Fields
-        fields = [
-            ("Company", "text", product_data.get('company', '')),
-            ("Color", "text", product_data.get('color', '')),
-            ("Size", "text", product_data.get('volume', '')),
-            ("Type", "text", product_data.get('type', '')),
-            ("Purchase Price", "number", product_data.get('purchase_price', 0)),
-            ("Sale Price", "number", product_data.get('sale_price', 0)),
-            ("Stock", "number", product_data.get('current_stock', 0))
-        ]
-        
-        entries = {}
-        
-        for field_name, field_type, default_value in fields:
-            frame = tk.Frame(scrollable_frame, bg='white')
-            frame.pack(fill=tk.X, pady=6)
-            
-            tk.Label(
-                frame,
-                text=f"{field_name}:",
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white',
-                width=12,
-                anchor='w'
-            ).pack(side=tk.LEFT)
-            
-            if field_type == 'number':
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')
-                entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
-            else:
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)
-            
-            # Set default value
-            entry.insert(0, str(default_value))
-            
-            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)
-            entries[field_name] = entry
-        
-        # Buttons
-        button_frame = tk.Frame(scrollable_frame, bg='white')
-        button_frame.pack(fill=tk.X, pady=15)
-        
-        def update_product():
-            try:
-                updated_data = {
-                    'category_id': product_data.get('category_id'),
-                    'company': entries['Company'].get().strip(),
-                    'type': entries['Type'].get().strip(),
-                    'color': entries['Color'].get().strip(),
-                    'sale_price': float(entries['Sale Price'].get() or 0),
-                    'purchase_price': float(entries['Purchase Price'].get() or 0),
-                    'packing': "",
-                    'volume': entries['Size'].get().strip(),
-                    'current_stock': int(entries['Stock'].get() or 0),
-                    'image_path': image_path_var.get()
-                }
-                
-                # Validate required fields
-                required_fields = ['Company', 'Color', 'Size', 'Type']
-                for field in required_fields:
-                    if not entries[field].get().strip():
-                        messagebox.showerror("Error", f"{field} is required!")
-                        return
-                
-                # Validate prices and stock
-                if updated_data['purchase_price'] <= 0:
-                    messagebox.showerror("Error", "Purchase price must be greater than 0!")
-                    entries['Purchase Price'].focus()
-                    return
-                
-                if updated_data['sale_price'] <= 0:
-                    messagebox.showerror("Error", "Sale price must be greater than 0!")
-                    entries['Sale Price'].focus()
-                    return
-                
-                if updated_data['current_stock'] < 0:
-                    messagebox.showerror("Error", "Stock quantity cannot be negative!")
-                    entries['Stock'].focus()
-                    return
-                
-                # Use product service to update
-                updated_count = self.product_service.update_product(product_id, updated_data)
-                
-                if updated_count > 0:
-                    messagebox.showinfo("Success", "Sanitary product updated successfully!")
-                    dialog.destroy()
-                    self.load_products(self.current_category)
-                else:
-                    messagebox.showerror("Error", "Failed to update sanitary product!")
-                    
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to update sanitary product: {str(e)}")
-        
-        update_btn = tk.Button(
-            button_frame,
-            text="Update Sanitary",
-            font=('Arial', 11, 'bold'),
-            bg='#3498db',
-            fg='white',
-            relief='flat',
-            command=update_product
-        )
-        update_btn.pack(side=tk.RIGHT, padx=(8, 0))
-        
-        cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
-            font=('Arial', 11),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=dialog.destroy
-        )
-        cancel_btn.pack(side=tk.RIGHT)
-        
-        # Set focus to first field
-        entries['Company'].focus()
-        dialog.bind('<Return>', lambda e: update_product())
-
-    def open_generic_edit_dialog(self, product_id, product_data):
-        """Open generic edit dialog for other categories"""
-        dialog = tk.Toplevel(self.parent)
-        dialog.title("Edit Product")
-        dialog.geometry("450x550")
-        dialog.configure(bg='white')
-        dialog.transient(self.parent)
-        dialog.grab_set()
-        
-        # Position within dashboard boundaries
-        self.parent.update_idletasks()
-        parent_x = self.parent.winfo_x()
-        parent_y = self.parent.winfo_y()
-        parent_width = self.parent.winfo_width()
-        parent_height = self.parent.winfo_height()
-        
-        form_width = 450
-        form_height = 550
-        x = parent_x + parent_width - form_width - 20
-        y = parent_y + 100
-        
-        screen_width = self.parent.winfo_screenwidth()
-        screen_height = self.parent.winfo_screenheight()
-        
-        if x + form_width > screen_width:
-            x = screen_width - form_width - 20
-        
-        if y + form_height > screen_height:
-            y = screen_height - form_height - 20
-        
-        dialog.geometry(f"{form_width}x{form_height}+{x}+{y}")
-        
-        # Create scrollable form
-        canvas = tk.Canvas(dialog, bg='white', highlightthickness=0)
-        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg='white')
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        canvas.pack(side="left", fill="both", expand=True, padx=15, pady=15)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Form Title
-        tk.Label(
-            scrollable_frame,
-            text="Edit Product",
-            font=('Arial', 16, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(anchor='w', pady=(0, 15))
-        
-        # Image Upload Section
-        image_frame = tk.Frame(scrollable_frame, bg='white')
-        image_frame.pack(fill=tk.X, pady=8)
-        
-        tk.Label(
-            image_frame,
-            text="Product Image:",
-            font=('Arial', 10, 'bold'),
-            fg='#2c3e50',
-            bg='white',
-            width=12,
-            anchor='w'
-        ).pack(side=tk.LEFT)
-        
-        image_path_var = tk.StringVar(value=product_data.get('image_path', ''))
-        image_entry = tk.Entry(
-            image_frame, 
-            textvariable=image_path_var,
-            font=('Arial', 10),
-            relief='solid', 
-            bd=1,
-            state='readonly'
-        )
-        image_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3, padx=(0, 8))
-        
-        def browse_image():
-            file_path = filedialog.askopenfilename(
-                title="Select Product Image",
-                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
-            )
-            if file_path:
-                image_path_var.set(file_path)
-        
-        browse_btn = tk.Button(
-            image_frame,
-            text="Browse",
-            font=('Arial', 9),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=browse_image
-        )
-        browse_btn.pack(side=tk.RIGHT)
-        
-        # Generic Fields
-        fields = [
-            ("Company", "text", product_data.get('company', '')),
-            ("Type", "text", product_data.get('type', '')),
-            ("Color", "text", product_data.get('color', '')),
-            ("Packing", "text", product_data.get('packing', '')),
-            ("Volume", "text", product_data.get('volume', '')),
-            ("Purchase Price", "number", product_data.get('purchase_price', 0)),
-            ("Sale Price", "number", product_data.get('sale_price', 0)),
-            ("Stock", "number", product_data.get('current_stock', 0))
-        ]
-        
-        entries = {}
-        
-        for field_name, field_type, default_value in fields:
-            frame = tk.Frame(scrollable_frame, bg='white')
-            frame.pack(fill=tk.X, pady=6)
-            
-            tk.Label(
-                frame,
-                text=f"{field_name}:",
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white',
-                width=12,
-                anchor='w'
-            ).pack(side=tk.LEFT)
-            
-            if field_type == 'number':
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1, validate='key')
-                entry.config(validatecommand=(entry.register(self.validate_number), '%P'))
-            else:
-                entry = tk.Entry(frame, font=('Arial', 10), relief='solid', bd=1)
-            
-            # Set default value
-            entry.insert(0, str(default_value))
-            
-            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=3)
-            entries[field_name] = entry
-        
-        # Buttons
-        button_frame = tk.Frame(scrollable_frame, bg='white')
-        button_frame.pack(fill=tk.X, pady=15)
-        
-        def update_product():
-            try:
-                updated_data = {
-                    'category_id': product_data.get('category_id'),
-                    'company': entries['Company'].get().strip(),
-                    'type': entries['Type'].get().strip(),
-                    'color': entries['Color'].get().strip(),
-                    'sale_price': float(entries['Sale Price'].get() or 0),
-                    'purchase_price': float(entries['Purchase Price'].get() or 0),
-                    'packing': entries['Packing'].get().strip(),
-                    'volume': entries['Volume'].get().strip(),
-                    'current_stock': int(entries['Stock'].get() or 0),
-                    'image_path': image_path_var.get()
-                }
-                
-                # Validate required fields
-                required_fields = ['Company', 'Type', 'Color', 'Packing']
-                for field in required_fields:
-                    if not entries[field].get().strip():
-                        messagebox.showerror("Error", f"{field} is required!")
-                        return
-                
-                # Validate prices and stock
-                if updated_data['purchase_price'] <= 0:
-                    messagebox.showerror("Error", "Purchase price must be greater than 0!")
-                    entries['Purchase Price'].focus()
-                    return
-                
-                if updated_data['sale_price'] <= 0:
-                    messagebox.showerror("Error", "Sale price must be greater than 0!")
-                    entries['Sale Price'].focus()
-                    return
-                
-                if updated_data['current_stock'] < 0:
-                    messagebox.showerror("Error", "Stock quantity cannot be negative!")
-                    entries['Stock'].focus()
-                    return
-                
-                # Use product service to update
-                updated_count = self.product_service.update_product(product_id, updated_data)
-                
-                if updated_count > 0:
-                    messagebox.showinfo("Success", "Product updated successfully!")
-                    dialog.destroy()
-                    self.load_products(self.current_category)
-                else:
-                    messagebox.showerror("Error", "Failed to update product!")
-                    
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to update product: {str(e)}")
-        
-        update_btn = tk.Button(
-            button_frame,
-            text="Update Product",
-            font=('Arial', 11, 'bold'),
-            bg='#3498db',
-            fg='white',
-            relief='flat',
-            command=update_product
-        )
-        update_btn.pack(side=tk.RIGHT, padx=(8, 0))
-        
-        cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
-            font=('Arial', 11),
-            bg='#95a5a6',
-            fg='white',
-            relief='flat',
-            command=dialog.destroy
-        )
-        cancel_btn.pack(side=tk.RIGHT)
-        
-        # Set focus to first field
-        entries['Company'].focus()
-        dialog.bind('<Return>', lambda e: update_product())
 
     def validate_number(self, value):
         """Validate number input"""
