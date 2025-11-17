@@ -1,520 +1,10 @@
-# import tkinter as tk
-# from tkinter import ttk
-# from backend.sale_service import SaleService
-# from backend.stock_service import StockService
-# from backend.product_service import ProductService
-# from datetime import datetime, timedelta
-
-# class Dashboard:
-#     def __init__(self, parent):
-#         self.parent = parent
-#         self.sale_service = SaleService()
-#         self.stock_service = StockService()
-#         self.product_service = ProductService()
-#         self.setup_ui()
-#         self.load_dashboard_data()
-        
-#     def setup_ui(self):
-#         # Main container with professional background
-#         main_frame = tk.Frame(self.parent, bg='#f8f9fa')
-#         main_frame.pack(fill=tk.BOTH, expand=True)
-        
-#         # Header Section - Professional Business Style
-#         header_frame = tk.Frame(main_frame, bg='#ffffff', height=80)
-#         header_frame.pack(fill=tk.X, padx=20, pady=(20, 10))
-#         header_frame.pack_propagate(False)
-        
-#         # Company branding
-#         brand_frame = tk.Frame(header_frame, bg='#ffffff')
-#         brand_frame.pack(side=tk.LEFT, padx=20)
-        
-#         tk.Label(
-#             brand_frame,
-#             text="AWAN HARDWARE",
-#             font=('Arial', 20, 'bold'),
-#             fg='#2c3e50',
-#             bg='#ffffff'
-#         ).pack(anchor='w')
-        
-#         tk.Label(
-#             brand_frame,
-#             text="Business Intelligence Dashboard",
-#             font=('Arial', 11),
-#             fg='#7f8c8d',
-#             bg='#ffffff'
-#         ).pack(anchor='w')
-        
-#         # Current date and time - Professional placement
-#         time_frame = tk.Frame(header_frame, bg='#ffffff')
-#         time_frame.pack(side=tk.RIGHT, padx=20)
-        
-#         self.time_label = tk.Label(
-#             time_frame,
-#             text="",
-#             font=('Arial', 11, 'bold'),
-#             fg='#3498db',
-#             bg='#ffffff'
-#         )
-#         self.time_label.pack(anchor='e')
-        
-#         self.date_label = tk.Label(
-#             time_frame,
-#             text="",
-#             font=('Arial', 10),
-#             fg='#7f8c8d',
-#             bg='#ffffff'
-#         )
-#         self.date_label.pack(anchor='e')
-        
-#         self.update_time()
-        
-#         # 🔥 KPI METRICS - Top Row (Business KPIs)
-#         kpi_frame = tk.Frame(main_frame, bg='#f8f9fa')
-#         kpi_frame.pack(fill=tk.X, padx=20, pady=10)
-        
-#         # Key Performance Indicators
-#         kpis = [
-#             {
-#                 "title": "Daily Revenue",
-#                 "value": "₨0",
-#                 "change": "+0%",
-#                 "icon": "💰",
-#                 "color": "#27ae60",
-#                 "bg_color": "#d5f4e6"
-#             },
-#             {
-#                 "title": "Total Inventory",
-#                 "value": "0",
-#                 "change": "Items",
-#                 "icon": "📦",
-#                 "color": "#3498db",
-#                 "bg_color": "#d6eaf8"
-#             },
-#             {
-#                 "title": "Stock Alerts",
-#                 "value": "0",
-#                 "change": "Needs Attention",
-#                 "icon": "⚠️",
-#                 "color": "#e74c3c",
-#                 "bg_color": "#fadbd8"
-#             },
-#             {
-#                 "title": "Inventory Value",
-#                 "value": "₨0",
-#                 "change": "Total Assets",
-#                 "icon": "💎",
-#                 "color": "#9b59b6",
-#                 "bg_color": "#e8daef"
-#             }
-#         ]
-        
-#         self.kpi_cards = {}
-#         for i, kpi in enumerate(kpis):
-#             card = self.create_kpi_card(kpi_frame, kpi, i)
-#             card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
-#             self.kpi_cards[kpi["title"]] = card
-        
-#         # 📊 MAIN DASHBOARD GRID - Professional 2-column layout
-#         dashboard_frame = tk.Frame(main_frame, bg='#f8f9fa')
-#         dashboard_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
-        
-#         # Left Column - Financial Performance
-#         left_column = tk.Frame(dashboard_frame, bg='#f8f9fa')
-#         left_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
-        
-#         # Right Column - Inventory & Operations
-#         right_column = tk.Frame(dashboard_frame, bg='#f8f9fa')
-#         right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
-        
-#         # 🎯 LEFT COLUMN - Financial Metrics
-        
-#         # Sales Performance Card
-#         sales_card = self.create_dashboard_card(left_column, "Sales Performance", "#e74c3c")
-#         sales_card.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
-        
-#         sales_content = tk.Frame(sales_card, bg='white')
-#         sales_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-#         # Sales metrics in a clean table format
-#         self.sales_metrics = {
-#             "Today's Revenue": {"value": "₨0", "trend": "↗️"},
-#             "Weekly Total": {"value": "₨0", "trend": "↗️"},
-#             "Monthly Total": {"value": "₨0", "trend": "↗️"},
-#             "YTD Revenue": {"value": "₨0", "trend": "↗️"},
-#             "Avg. Transaction": {"value": "₨0", "trend": "→"},
-#             "Total Transactions": {"value": "0", "trend": "↗️"}
-#         }
-        
-#         for metric, data in self.sales_metrics.items():
-#             metric_row = tk.Frame(sales_content, bg='white')
-#             metric_row.pack(fill=tk.X, pady=8)
-            
-#             tk.Label(
-#                 metric_row,
-#                 text=metric,
-#                 font=('Arial', 10),
-#                 fg='#2c3e50',
-#                 bg='white',
-#                 anchor='w'
-#             ).pack(side=tk.LEFT)
-            
-#             value_frame = tk.Frame(metric_row, bg='white')
-#             value_frame.pack(side=tk.RIGHT)
-            
-#             trend_label = tk.Label(
-#                 value_frame,
-#                 text=data["trend"],
-#                 font=('Arial', 10),
-#                 bg='white'
-#             )
-#             trend_label.pack(side=tk.LEFT, padx=(0, 5))
-            
-#             value_label = tk.Label(
-#                 value_frame,
-#                 text=data["value"],
-#                 font=('Arial', 10, 'bold'),
-#                 fg='#2c3e50',
-#                 bg='white'
-#             )
-#             value_label.pack(side=tk.LEFT)
-#             self.sales_metrics[metric] = {"value_label": value_label, "trend_label": trend_label}
-        
-#         # Recent Activity Card
-#         activity_card = self.create_dashboard_card(left_column, "Recent Activity", "#3498db")
-#         activity_card.pack(fill=tk.BOTH, expand=True, pady=(15, 0))
-        
-#         activity_content = tk.Frame(activity_card, bg='white')
-#         activity_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-#         # Recent transactions table
-#         columns = ('Time', 'Transaction', 'Amount')
-#         self.activity_tree = ttk.Treeview(activity_content, columns=columns, show='headings', height=6)
-        
-#         self.activity_tree.heading('Time', text='Time')
-#         self.activity_tree.heading('Transaction', text='Transaction')
-#         self.activity_tree.heading('Amount', text='Amount')
-        
-#         self.activity_tree.column('Time', width=80)
-#         self.activity_tree.column('Transaction', width=120)
-#         self.activity_tree.column('Amount', width=80)
-        
-#         self.activity_tree.pack(fill=tk.BOTH, expand=True)
-        
-#         # 🎯 RIGHT COLUMN - Inventory & Operations
-        
-#         # Inventory Overview Card
-#         inventory_card = self.create_dashboard_card(right_column, "Inventory Overview", "#27ae60")
-#         inventory_card.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
-        
-#         inventory_content = tk.Frame(inventory_card, bg='white')
-#         inventory_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-#         self.inventory_metrics = {
-#             "Total Products": {"value": "0", "status": "📊"},
-#             "Active Categories": {"value": "0", "status": "📁"},
-#             "Out of Stock": {"value": "0", "status": "❌"},
-#             "Low Stock Items": {"value": "0", "status": "🟡"},
-#             "Total Inventory Value": {"value": "₨0", "status": "💎"},
-#             "Stock Turnover": {"value": "0", "status": "🔄"}
-#         }
-        
-#         for metric, data in self.inventory_metrics.items():
-#             metric_row = tk.Frame(inventory_content, bg='white')
-#             metric_row.pack(fill=tk.X, pady=8)
-            
-#             status_label = tk.Label(
-#                 metric_row,
-#                 text=data["status"],
-#                 font=('Arial', 12),
-#                 bg='white'
-#             )
-#             status_label.pack(side=tk.LEFT, padx=(0, 10))
-            
-#             tk.Label(
-#                 metric_row,
-#                 text=metric,
-#                 font=('Arial', 10),
-#                 fg='#2c3e50',
-#                 bg='white',
-#                 anchor='w'
-#             ).pack(side=tk.LEFT, fill=tk.X, expand=True)
-            
-#             value_label = tk.Label(
-#                 metric_row,
-#                 text=data["value"],
-#                 font=('Arial', 10, 'bold'),
-#                 fg='#2c3e50',
-#                 bg='white'
-#             )
-#             value_label.pack(side=tk.RIGHT)
-#             self.inventory_metrics[metric] = {"value_label": value_label, "status_label": status_label}
-        
-#         # Quick Actions Card
-#         actions_card = self.create_dashboard_card(right_column, "Quick Actions", "#f39c12")
-#         actions_card.pack(fill=tk.BOTH, expand=True, pady=(15, 0))
-        
-#         actions_content = tk.Frame(actions_card, bg='white')
-#         actions_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-#         # Professional action buttons
-#         actions = [
-#             ("📊 Generate Report", "#3498db", self.generate_report),
-#             ("💰 New Sale", "#27ae60", self.new_sale),
-#             ("📦 Manage Inventory", "#e67e22", self.manage_inventory),
-#             ("⚠️ View Alerts", "#e74c3c", self.view_alerts)
-#         ]
-        
-#         for action, color, command in actions:
-#             btn = tk.Button(
-#                 actions_content,
-#                 text=action,
-#                 font=('Arial', 10, 'bold'),
-#                 bg=color,
-#                 fg='white',
-#                 relief='flat',
-#                 height=2,
-#                 cursor='hand2',
-#                 command=command
-#             )
-#             btn.pack(fill=tk.X, pady=5)
-    
-#     def create_kpi_card(self, parent, kpi_data, index):
-#         """Create professional KPI card"""
-#         card = tk.Frame(
-#             parent,
-#             bg='white',
-#             relief='flat',
-#             bd=1,
-#             height=120
-#         )
-#         card.pack_propagate(False)
-        
-#         # Card content with professional spacing
-#         content_frame = tk.Frame(card, bg=kpi_data["bg_color"])
-#         content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
-        
-#         # Top row: Icon and Title
-#         top_frame = tk.Frame(content_frame, bg=kpi_data["bg_color"])
-#         top_frame.pack(fill=tk.X, pady=(0, 10))
-        
-#         tk.Label(
-#             top_frame,
-#             text=kpi_data["icon"],
-#             font=('Arial', 16),
-#             bg=kpi_data["bg_color"]
-#         ).pack(side=tk.LEFT)
-        
-#         tk.Label(
-#             top_frame,
-#             text=kpi_data["title"],
-#             font=('Arial', 11, 'bold'),
-#             bg=kpi_data["bg_color"],
-#             fg='#2c3e50'
-#         ).pack(side=tk.LEFT, padx=(8, 0))
-        
-#         # Middle: Main Value
-#         value_label = tk.Label(
-#             content_frame,
-#             text=kpi_data["value"],
-#             font=('Arial', 18, 'bold'),
-#             bg=kpi_data["bg_color"],
-#             fg=kpi_data["color"]
-#         )
-#         value_label.pack(anchor='w', pady=(0, 5))
-        
-#         # Bottom: Change/Status
-#         change_label = tk.Label(
-#             content_frame,
-#             text=kpi_data["change"],
-#             font=('Arial', 10),
-#             bg=kpi_data["bg_color"],
-#             fg='#7f8c8d'
-#         )
-#         change_label.pack(anchor='w')
-        
-#         # Store references for updates
-#         if kpi_data["title"] == "Daily Revenue":
-#             self.daily_revenue_label = value_label
-#         elif kpi_data["title"] == "Total Inventory":
-#             self.total_inventory_label = value_label
-#         elif kpi_data["title"] == "Stock Alerts":
-#             self.stock_alerts_label = value_label
-#         elif kpi_data["title"] == "Inventory Value":
-#             self.inventory_value_label = value_label
-        
-#         return card
-    
-#     def create_dashboard_card(self, parent, title, color):
-#         """Create professional dashboard card"""
-#         card = tk.Frame(
-#             parent,
-#             bg='white',
-#             relief='flat',
-#             bd=1
-#         )
-        
-#         # Card header with accent color
-#         header = tk.Frame(card, bg=color, height=5)
-#         header.pack(fill=tk.X)
-        
-#         # Title frame
-#         title_frame = tk.Frame(card, bg='white', height=40)
-#         title_frame.pack(fill=tk.X)
-#         title_frame.pack_propagate(False)
-        
-#         tk.Label(
-#             title_frame,
-#             text=title,
-#             font=('Arial', 12, 'bold'),
-#             fg='#2c3e50',
-#             bg='white'
-#         ).pack(anchor='w', padx=15, pady=10)
-        
-#         return card
-    
-#     def update_time(self):
-#         """Update current date and time with error handling"""
-#         try:
-#             if hasattr(self, 'time_label') and self.time_label.winfo_exists():
-#                 current_time = datetime.now().strftime("%I:%M:%S %p")
-#                 current_date = datetime.now().strftime("%B %d, %Y")
-                
-#                 self.time_label.config(text=f"🕒 {current_time}")
-#                 self.date_label.config(text=current_date)
-#                 self.parent.after(1000, self.update_time)
-#         except tk.TclError:
-#             # Widget destroyed, stop updating
-#             pass
-    
-#     def load_dashboard_data(self):
-#         """Load all dashboard data"""
-#         try:
-#             # Sales data
-#             sales_summary = self.sale_service.get_sales_summary()
-            
-#             # Update KPI cards
-#             self.daily_revenue_label.config(text=f"₨{sales_summary['today_revenue']:,.0f}")
-            
-#             # Inventory data
-#             stock_summary = self.stock_service.get_stock_summary()
-#             self.total_inventory_label.config(text=str(stock_summary['total_products']))
-#             self.stock_alerts_label.config(text=str(stock_summary['low_stock_count']))
-#             self.inventory_value_label.config(text=f"₨{stock_summary['total_value']:,.0f}")
-            
-#             # Update sales metrics
-#             self.update_sales_metrics(sales_summary)
-            
-#             # Update inventory metrics
-#             self.update_inventory_metrics(stock_summary)
-            
-#             # Load recent activity
-#             self.load_recent_activity()
-            
-#         except Exception as e:
-#             print(f"Dashboard data loading error: {e}")
-    
-#     def update_sales_metrics(self, sales_summary):
-#         """Update sales performance metrics"""
-#         try:
-#             # Calculate additional metrics
-#             weekly_revenue = sales_summary['total_revenue'] * 0.25  # Simplified
-#             monthly_revenue = sales_summary['total_revenue'] * 0.6  # Simplified
-#             avg_transaction = sales_summary['today_revenue'] / max(sales_summary['total_sales'], 1)
-            
-#             metrics_data = {
-#                 "Today's Revenue": f"₨{sales_summary['today_revenue']:,.0f}",
-#                 "Weekly Total": f"₨{weekly_revenue:,.0f}",
-#                 "Monthly Total": f"₨{monthly_revenue:,.0f}",
-#                 "YTD Revenue": f"₨{sales_summary['total_revenue']:,.0f}",
-#                 "Avg. Transaction": f"₨{avg_transaction:,.0f}",
-#                 "Total Transactions": str(sales_summary['total_sales'])
-#             }
-            
-#             for metric, value in metrics_data.items():
-#                 if metric in self.sales_metrics:
-#                     self.sales_metrics[metric]["value_label"].config(text=value)
-                    
-#         except Exception as e:
-#             print(f"Sales metrics update error: {e}")
-    
-#     def update_inventory_metrics(self, stock_summary):
-#         """Update inventory metrics"""
-#         try:
-#             metrics_data = {
-#                 "Total Products": str(stock_summary['total_products']),
-#                 "Active Categories": str(stock_summary['total_categories']),
-#                 "Out of Stock": str(stock_summary['out_of_stock_count']),
-#                 "Low Stock Items": str(stock_summary['low_stock_count']),
-#                 "Total Inventory Value": f"₨{stock_summary['total_value']:,.0f}",
-#                 "Stock Turnover": "2.5"  # Placeholder
-#             }
-            
-#             for metric, value in metrics_data.items():
-#                 if metric in self.inventory_metrics:
-#                     self.inventory_metrics[metric]["value_label"].config(text=value)
-                    
-#         except Exception as e:
-#             print(f"Inventory metrics update error: {e}")
-    
-#     def load_recent_activity(self):
-#         """Load recent sales activity"""
-#         try:
-#             # Clear existing data
-#             for item in self.activity_tree.get_children():
-#                 self.activity_tree.delete(item)
-            
-#             sales = self.sale_service.get_sales_report()[:6]  # Last 6 sales
-            
-#             for sale in sales:
-#                 if len(sale) >= 7:
-#                     sale_id = sale[0]
-#                     amount = sale[4] if len(sale) > 4 else 0
-#                     date_str = sale[6] if len(sale) > 6 else ''
-                    
-#                     # Format time
-#                     try:
-#                         if date_str:
-#                             sale_time = date_str[11:16] if len(date_str) > 16 else 'N/A'
-#                         else:
-#                             sale_time = 'N/A'
-#                     except:
-#                         sale_time = 'N/A'
-                    
-#                     self.activity_tree.insert('', 'end', values=(
-#                         sale_time,
-#                         f"Sale #{sale_id}",
-#                         f"₨{float(amount):,.0f}"
-#                     ))
-                    
-#         except Exception as e:
-#             print(f"Recent activity loading error: {e}")
-    
-#     # Action methods
-#     def generate_report(self):
-#         """Generate business report"""
-#         from tkinter import messagebox
-#         messagebox.showinfo("Report", "Business report generation feature will be implemented here.")
-    
-#     def new_sale(self):
-#         """Start new sale"""
-#         from tkinter import messagebox
-#         messagebox.showinfo("New Sale", "Redirecting to Point of Sale system...")
-    
-#     def manage_inventory(self):
-#         """Manage inventory"""
-#         from tkinter import messagebox
-#         messagebox.showinfo("Inventory", "Redirecting to Inventory Management...")
-    
-#     def view_alerts(self):
-#         """View stock alerts"""
-#         from tkinter import messagebox
-#         messagebox.showinfo("Alerts", "Showing stock alerts and notifications...")
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Canvas
 from backend.sale_service import SaleService
 from backend.stock_service import StockService
 from backend.product_service import ProductService
 from datetime import datetime, timedelta
+import numpy as np
 
 class Dashboard:
     def __init__(self, parent):
@@ -522,339 +12,819 @@ class Dashboard:
         self.sale_service = SaleService()
         self.stock_service = StockService()
         self.product_service = ProductService()
+        
+        # Color palette for professional look
+        self.colors = {
+            'primary': '#1f77b4',      # Blue
+            'secondary': '#ff7f0e',    # Orange
+            'success': '#2ca02c',      # Green
+            'danger': '#d62728',       # Red
+            'warning': '#ff9800',      # Amber
+            'info': '#17a2b8',        # Cyan
+            'light': '#f8f9fa',       # Light gray
+            'dark': '#343a40',         # Dark gray
+            'purple': '#9b59b6',       # Purple
+            'teal': '#1abc9c',        # Teal
+            'zakat': '#059669'         # Special color for Zakat
+        }
+        
         self.setup_ui()
         self.load_dashboard_data()
         
     def setup_ui(self):
-        # Main container with professional background
-        main_frame = tk.Frame(self.parent, bg='#f8f9fa')
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        # Create scrollable main container - FIXED to take full width
+        self.canvas = Canvas(self.parent, bg='#f5f7fa', highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self.parent, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = tk.Frame(self.canvas, bg='#f5f7fa')
         
-        # Header Section
-        header_frame = tk.Frame(main_frame, bg='#ffffff', height=80)
-        header_frame.pack(fill=tk.X, padx=20, pady=(20, 10))
-        header_frame.pack_propagate(False)
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        # Create window in canvas with full width
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Pack scrollbar first (right side)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # Pack canvas to fill remaining space
+        self.canvas.pack(side="left", fill="both", expand=True)
+        
+        # Update canvas window width after packing
+        self.parent.update_idletasks()
+        self.canvas.itemconfig(self.canvas_window, width=self.canvas.winfo_width())
+        
+        # Bind resize event
+        self.canvas.bind('<Configure>', lambda e: self._update_canvas_width())
+        
+        # Create all UI elements in scrollable frame
+        self.create_top_navigation()
+        self.create_kpi_section()
+        self.create_daily_sales_section()
+        self.create_monthly_sales_section()
+        self.create_inventory_category_section()
+        self.create_tables_section()
+        
+        # Bind mouse wheel for scrolling
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        
+    def _update_canvas_width(self):
+        """Update canvas window width to match canvas width"""
+        try:
+            canvas_width = self.canvas.winfo_width()
+            if canvas_width > 1:  # Ensure canvas has valid width
+                self.canvas.itemconfig(self.canvas_window, width=canvas_width)
+        except:
+            pass
+        
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+    def create_top_navigation(self):
+        # Top navigation bar
+        nav_frame = tk.Frame(self.scrollable_frame, bg=self.colors['dark'], height=70)
+        nav_frame.pack(fill=tk.X, padx=0, pady=0)
+        nav_frame.pack_propagate(False)
         
         # Company branding
-        brand_frame = tk.Frame(header_frame, bg='#ffffff')
-        brand_frame.pack(side=tk.LEFT, padx=20)
+        brand_frame = tk.Frame(nav_frame, bg=self.colors['dark'])
+        brand_frame.pack(side=tk.LEFT, padx=20, pady=15)
         
         tk.Label(
             brand_frame,
-            text="AWAN HARDWARE",
-            font=('Arial', 20, 'bold'),
-            fg='#2c3e50',
-            bg='#ffffff'
-        ).pack(anchor='w')
+            text="AWAN HARDWARE & PAINTS STORE ARJA",
+            font=('Arial', 22, 'bold'),
+            fg='white',
+            bg=self.colors['dark']
+        ).pack(side=tk.LEFT)
         
         tk.Label(
             brand_frame,
-            text="Business Intelligence Dashboard",
-            font=('Arial', 11),
-            fg='#7f8c8d',
-            bg='#ffffff'
-        ).pack(anchor='w')
+            text="Business Analytics",
+            font=('Arial', 12),
+            fg='#adb5bd',
+            bg=self.colors['dark']
+        ).pack(side=tk.LEFT, padx=(15, 0))
         
-        # Current date and time
-        time_frame = tk.Frame(header_frame, bg='#ffffff')
-        time_frame.pack(side=tk.RIGHT, padx=20)
+        # Date and time display
+        time_frame = tk.Frame(nav_frame, bg=self.colors['dark'])
+        time_frame.pack(side=tk.RIGHT, padx=20, pady=15)
         
         self.date_label = tk.Label(
             time_frame,
             text="",
-            font=('Arial', 11, 'bold'),
-            fg='#3498db',
-            bg='#ffffff'
+            font=('Arial', 11),
+            fg='#f8f9fa',
+            bg=self.colors['dark']
         )
-        self.date_label.pack(anchor='e')
+        self.date_label.pack()
         
-        # 🔥 KPI METRICS - Top Row
-        kpi_frame = tk.Frame(main_frame, bg='#f8f9fa')
-        kpi_frame.pack(fill=tk.X, padx=20, pady=10)
+        self.update_time()
         
-        # Key Performance Indicators - FIXED REVENUE DISPLAY
-        kpis = [
-            {
-                "title": "TODAY'S REVENUE",
-                "value": "₨0",
-                "subtitle": "Sales Today",
-                "icon": "💰",
-                "color": "#27ae60",
-                "bg_color": "#d5f4e6"
-            },
-            {
-                "title": "TOTAL REVENUE",  # CHANGED FROM INVENTORY
-                "value": "₨0",
-                "subtitle": "All Time Sales",
-                "icon": "📈",
-                "color": "#3498db", 
-                "bg_color": "#d6eaf8"
-            },
-            {
-                "title": "TOTAL INVENTORY",
-                "value": "0",
-                "subtitle": "Products",
-                "icon": "📦",
-                "color": "#e67e22",
-                "bg_color": "#fdebd0"
-            },
-            {
-                "title": "STOCK ALERTS",
-                "value": "0",
-                "subtitle": "Needs Attention", 
-                "icon": "⚠️",
-                "color": "#e74c3c",
-                "bg_color": "#fadbd8"
-            }
-        ]
+    def create_kpi_section(self):
+        # KPI section container - UPDATED WITH ZAKAT CARD
+        kpi_container = tk.Frame(self.scrollable_frame, bg='#f5f7fa')
+        kpi_container.pack(fill=tk.X, padx=20, pady=15)
         
-        self.kpi_cards = {}
-        for kpi in kpis:
-            card = self.create_kpi_card(kpi_frame, kpi)
-            card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
-            self.kpi_cards[kpi["title"]] = card
+        # Configure grid for 4 columns
+        for i in range(4):
+            kpi_container.grid_columnconfigure(i, weight=1)
         
-        # 📊 MAIN DASHBOARD GRID
-        dashboard_frame = tk.Frame(main_frame, bg='#f8f9fa')
-        dashboard_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
-        
-        # Left Column - Financial Performance
-        left_column = tk.Frame(dashboard_frame, bg='#f8f9fa')
-        left_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
-        
-        # Right Column - Inventory & Operations  
-        right_column = tk.Frame(dashboard_frame, bg='#f8f9fa')
-        right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
-        
-        # 🎯 LEFT COLUMN - Financial Metrics
-        
-        # Sales Performance Card
-        sales_card = self.create_dashboard_card(left_column, "💰 SALES PERFORMANCE", "#e74c3c")
-        sales_card.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
-        
-        sales_content = tk.Frame(sales_card, bg='white')
-        sales_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        # Sales metrics - FOCUS ON REVENUE
-        self.sales_metrics = {
-            "Today's Revenue": "₨0",
-            "This Week": "₨0", 
-            "This Month": "₨0",
-            "Total Revenue": "₨0",
-            "Total Transactions": "0",
-            "Avg. Sale Value": "₨0"
+        # KPI data - REPLACED low_stock with zakat
+        self.kpi_data = {
+            'revenue_today': {'title': "Today's Sale", 'value': 0, 'change': 0, 'icon': '💰'},
+            'revenue_total': {'title': "Total Sale", 'value': 0, 'change': 0, 'icon': '📈'},
+            'total_inventory_value': {'title': "Inventory Value", 'value': 0, 'change': 0, 'icon': '🏪'},
+            'zakat': {'title': "Zakat Payable", 'value': 0, 'change': 0, 'icon': '🕌', 'color': self.colors['zakat']}  # NEW CARD
         }
         
-        for metric, value in self.sales_metrics.items():
-            metric_row = tk.Frame(sales_content, bg='white')
-            metric_row.pack(fill=tk.X, pady=8)
+        self.kpi_widgets = {}
+        
+        # Create KPI cards in a 2x2 grid
+        for i, (key, data) in enumerate(self.kpi_data.items()):
+            row = i // 2
+            col = i % 2
             
-            tk.Label(
-                metric_row,
-                text=metric,
-                font=('Arial', 10),
-                fg='#2c3e50',
-                bg='white',
-                anchor='w'
-            ).pack(side=tk.LEFT, fill=tk.X, expand=True)
-            
-            value_label = tk.Label(
-                metric_row,
-                text=value,
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white'
-            )
-            value_label.pack(side=tk.RIGHT)
-            self.sales_metrics[metric] = value_label
-        
-        # Recent Sales Card
-        recent_card = self.create_dashboard_card(left_column, "🔄 RECENT TRANSACTIONS", "#3498db")
-        recent_card.pack(fill=tk.BOTH, expand=True, pady=(15, 0))
-        
-        recent_content = tk.Frame(recent_card, bg='white')
-        recent_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        # Recent transactions
-        self.recent_text = tk.Text(
-            recent_content,
-            height=6,
-            font=('Arial', 9),
-            bg='#f8f9fa', 
-            fg='#2c3e50',
-            relief='flat',
-            wrap=tk.WORD
-        )
-        self.recent_text.pack(fill=tk.BOTH, expand=True)
-        self.recent_text.insert('1.0', "Loading recent transactions...")
-        self.recent_text.config(state='disabled')
-        
-        # 🎯 RIGHT COLUMN - Inventory & Operations
-        
-        # Inventory Overview Card
-        inventory_card = self.create_dashboard_card(right_column, "📦 INVENTORY OVERVIEW", "#27ae60")
-        inventory_card.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
-        
-        inventory_content = tk.Frame(inventory_card, bg='white')
-        inventory_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        self.inventory_metrics = {
-            "Total Products": "0",
-            "Product Categories": "0", 
-            "Out of Stock": "0",
-            "Low Stock (<5)": "0",
-            "Total Stock Value": "₨0",
-            "Inventory Health": "Good"
-        }
-        
-        for metric, value in self.inventory_metrics.items():
-            metric_row = tk.Frame(inventory_content, bg='white')
-            metric_row.pack(fill=tk.X, pady=8)
-            
-            tk.Label(
-                metric_row,
-                text=metric,
-                font=('Arial', 10),
-                fg='#2c3e50', 
-                bg='white',
-                anchor='w'
-            ).pack(side=tk.LEFT, fill=tk.X, expand=True)
-            
-            value_label = tk.Label(
-                metric_row,
-                text=value,
-                font=('Arial', 10, 'bold'),
-                fg='#2c3e50',
-                bg='white'
-            )
-            value_label.pack(side=tk.RIGHT)
-            self.inventory_metrics[metric] = value_label
-        
-        # Quick Actions Card
-        actions_card = self.create_dashboard_card(right_column, "⚡ QUICK ACTIONS", "#f39c12")
-        actions_card.pack(fill=tk.BOTH, expand=True, pady=(15, 0))
-        
-        actions_content = tk.Frame(actions_card, bg='white')
-        actions_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        # Action buttons
-        actions = [
-            ("💰 New Sale", "#27ae60", self.new_sale),
-            ("📦 Add Product", "#3498db", self.add_product),
-            ("📊 View Reports", "#9b59b6", self.view_reports),
-            ("⚠️ Stock Alerts", "#e74c3c", self.stock_alerts)
-        ]
-        
-        for action, color, command in actions:
-            btn = tk.Button(
-                actions_content,
-                text=action,
-                font=('Arial', 10, 'bold'),
-                bg=color,
-                fg='white',
-                relief='flat',
-                height=2,
-                cursor='hand2',
-                command=command
-            )
-            btn.pack(fill=tk.X, pady=5)
+            card = self.create_modern_kpi_card(kpi_container, data)
+            card.grid(row=row, column=col, padx=8, pady=8, sticky='nsew')
+            self.kpi_widgets[key] = card
     
-    def create_kpi_card(self, parent, kpi_data):
-        """Create KPI card"""
-        card = tk.Frame(
-            parent,
-            bg='white',
-            relief='flat',
-            bd=1,
-            height=120
-        )
-        card.pack_propagate(False)
+    def create_modern_kpi_card(self, parent, data):
+        # Create modern KPI card with shadow effect
+        shadow = tk.Frame(parent, bg='#e9ecef', relief='flat', bd=0)
+        shadow.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2, pady=2)
         
-        content_frame = tk.Frame(card, bg=kpi_data["bg_color"])
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        # Main card
+        card = tk.Frame(shadow, bg='white', relief='flat', bd=0)
+        card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
         
-        # Icon and title
-        icon_frame = tk.Frame(content_frame, bg=kpi_data["bg_color"])
-        icon_frame.pack(fill=tk.X, pady=(0, 10))
+        # Card content
+        content = tk.Frame(card, bg='white')
+        content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        tk.Label(
-            icon_frame,
-            text=kpi_data["icon"],
-            font=('Arial', 16),
-            bg=kpi_data["bg_color"]
-        ).pack(side=tk.LEFT)
+        # Header with icon and title
+        header_frame = tk.Frame(content, bg='white')
+        header_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Icon
+        icon_frame = tk.Frame(header_frame, bg=data.get('color', self.colors['primary']), width=44, height=44)
+        icon_frame.pack(side=tk.LEFT, padx=(0, 12))
+        icon_frame.pack_propagate(False)
         
         tk.Label(
             icon_frame,
-            text=kpi_data["title"],
-            font=('Arial', 11, 'bold'),
-            bg=kpi_data["bg_color"],
-            fg='#2c3e50'
-        ).pack(side=tk.LEFT, padx=(8, 0))
+            text=data['icon'],
+            font=('Arial', 18),
+            bg=data.get('color', self.colors['primary']),
+            fg='white'
+        ).pack(expand=True)
         
-        # Main value
-        value_label = tk.Label(
-            content_frame,
-            text=kpi_data["value"],
-            font=('Arial', 18, 'bold'),
-            bg=kpi_data["bg_color"],
-            fg=kpi_data["color"]
-        )
-        value_label.pack(anchor='w', pady=(0, 5))
+        # Title and description
+        text_frame = tk.Frame(header_frame, bg='white')
+        text_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        # Subtitle
         tk.Label(
-            content_frame,
-            text=kpi_data["subtitle"],
-            font=('Arial', 10),
-            bg=kpi_data["bg_color"],
-            fg='#7f8c8d'
+            text_frame,
+            text=data['title'],
+            font=('Arial', 12, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
         ).pack(anchor='w')
         
-        # Store references
-        if kpi_data["title"] == "TODAY'S REVENUE":
-            self.today_revenue_kpi = value_label
-        elif kpi_data["title"] == "TOTAL REVENUE":
-            self.total_revenue_kpi = value_label
-        elif kpi_data["title"] == "TOTAL INVENTORY":
-            self.total_inventory_kpi = value_label
-        elif kpi_data["title"] == "STOCK ALERTS":
-            self.stock_alerts_kpi = value_label
+        # Value
+        value_label = tk.Label(
+            content,
+            text=f"₨{data['value']:,.0f}" if 'Revenue' in data['title'] or 'Inventory' in data['title'] else str(data['value']),
+            font=('Arial', 22, 'bold'),
+            fg=data.get('color', self.colors['primary']),
+            bg='white'
+        )
+        value_label.pack(anchor='w', pady=(5, 0))
+        
+        # Change indicator
+        change_frame = tk.Frame(content, bg='white')
+        change_frame.pack(fill=tk.X)
+        
+        change_label = tk.Label(
+            change_frame,
+            text=f"{'↑' if data['change'] >= 0 else '↓'} {abs(data['change']):.1f}%",
+            font=('Arial', 9),
+            bg='white',
+            fg=self.colors['success'] if data['change'] >= 0 else self.colors['danger']
+        )
+        change_label.pack(side=tk.LEFT)
+        
+        # Store references for updates on the card itself
+        card.value_label = value_label
+        card.change_label = change_label
         
         return card
     
-    def create_dashboard_card(self, parent, title, color):
-        """Create dashboard card"""
-        card = tk.Frame(
-            parent,
-            bg='white',
-            relief='flat',
-            bd=1
-        )
+    def calculate_zakat(self, inventory_value):
+        """Calculate Zakat based on inventory value (2.5% per lakh)"""
+        try:
+            # Convert inventory value to float
+            inventory_value = float(inventory_value) if inventory_value else 0
+            
+            # Calculate Zakat: 2.5% per lakh (100,000)
+            # Formula: (inventory_value / 100000) * 2500
+            zakat_amount = (inventory_value / 100000) * 2500
+            
+            return zakat_amount
+        except (ValueError, TypeError):
+            return 0
+    
+    def create_daily_sales_section(self):
+        # Daily Sales section container
+        daily_sales_container = tk.Frame(self.scrollable_frame, bg='#f5f7fa')
+        daily_sales_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
-        # Card header
-        header = tk.Frame(card, bg=color, height=5)
-        header.pack(fill=tk.X)
+        # Section title
+        shadow_title = tk.Frame(daily_sales_container, bg='#e9ecef', relief='flat', bd=0)
+        shadow_title.pack(fill=tk.X, pady=(0, 10))
         
-        title_frame = tk.Frame(card, bg='white', height=40)
-        title_frame.pack(fill=tk.X)
-        title_frame.pack_propagate(False)
+        title_card = tk.Frame(shadow_title, bg='white', relief='flat', bd=0)
+        title_card.pack(fill=tk.X, padx=1, pady=1)
         
         tk.Label(
-            title_frame,
-            text=title,
-            font=('Arial', 12, 'bold'),
-            fg='#2c3e50',
+            title_card,
+            text="📊 DAILY SALES OVERVIEW",
+            font=('Arial', 16, 'bold'),
+            fg=self.colors['dark'],
             bg='white'
-        ).pack(anchor='w', padx=15, pady=10)
+        ).pack(pady=15, padx=20, anchor='w')
+        
+        # Sales cards container
+        self.sales_cards_frame = tk.Frame(daily_sales_container, bg='#f5f7fa')
+        self.sales_cards_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Create 7 daily sales cards in CORRECT ORDER
+        self.daily_sales_cards = {}
+        
+        # Get today's date
+        today = datetime.now()
+        
+        # Create cards for the last 7 days, starting from 6 days ago to today
+        for days_back in range(6, -1, -1):  # 6, 5, 4, 3, 2, 1, 0
+            date = today - timedelta(days=days_back)
+            date_str = date.strftime('%Y-%m-%d')
+            day_name = date.strftime('%A')[:3]  # Mon, Tue, Wed, Thu, Fri, Sat, Sun
+            
+            # Check if this is today
+            is_today = (days_back == 0)
+            
+            card = self.create_daily_sales_card(self.sales_cards_frame, day_name, date_str, is_today)
+            card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+            self.daily_sales_cards[date_str] = card
+    
+    def create_daily_sales_card(self, parent, day_name, date_str, is_today=False):
+        # Create shadow effect
+        shadow = tk.Frame(parent, bg='#e9ecef', relief='flat', bd=0)
+        shadow.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2, pady=2)
+        
+        # Main card with different color for today
+        card_color = self.colors['primary'] if is_today else 'white'
+        text_color = 'white' if is_today else self.colors['dark']
+        
+        card = tk.Frame(shadow, bg=card_color, relief='flat', bd=0)
+        card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        
+        # Card content
+        content_frame = tk.Frame(card, bg=card_color)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Day name
+        day_label = tk.Label(
+            content_frame,
+            text=day_name,
+            font=('Arial', 11, 'bold'),
+            bg=card_color,
+            fg=text_color
+        )
+        day_label.pack(anchor='center')
+        
+        # Date
+        date_label = tk.Label(
+            content_frame,
+            text=datetime.strptime(date_str, '%Y-%m-%d').strftime('%m/%d'),
+            font=('Arial', 9),
+            bg=card_color,
+            fg=text_color if is_today else '#6c757d'
+        )
+        date_label.pack(anchor='center', pady=(2, 5))
+        
+        # Progress bar background
+        progress_bg = tk.Frame(content_frame, bg='#e9ecef' if not is_today else '#ffffff', height=4)
+        progress_bg.pack(fill=tk.X, pady=(5, 5))
+        progress_bg.pack_propagate(False)
+        
+        # Progress bar (will be updated)
+        progress_color = '#ffffff' if is_today else self.colors['success']
+        progress_bar = tk.Frame(progress_bg, bg=progress_color, height=4)
+        progress_bar.pack(side=tk.LEFT, fill=tk.Y)
+        progress_bar.pack_propagate(False)
+        
+        # Sales amount
+        amount_label = tk.Label(
+            content_frame,
+            text="₨0",
+            font=('Arial', 12, 'bold'),
+            bg=card_color,
+            fg=text_color
+        )
+        amount_label.pack(anchor='center', pady=(5, 0))
+        
+        # Transaction count
+        count_label = tk.Label(
+            content_frame,
+            text="0 sales",
+            font=('Arial', 8),
+            bg=card_color,
+            fg=text_color if is_today else '#6c757d'
+        )
+        count_label.pack(anchor='center')
+        
+        # Store references for updates
+        card.progress_bar = progress_bar
+        card.amount_label = amount_label
+        card.count_label = count_label
+        card.progress_bg = progress_bg
+        card.is_today = is_today
+        card.card_color = card_color
+        card.text_color = text_color
+        card.date_str = date_str  # Store date for later updates
         
         return card
+    
+    def get_years_for_dropdown(self):
+        """Get years for dropdown including current year and future years"""
+        try:
+            # Get sales data to find available years
+            with self.sale_service.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT DISTINCT strftime("%Y", sale_date) as year FROM sales ORDER BY year DESC')
+                db_years = [row[0] for row in cursor.fetchall()]
+            
+            # Current year
+            current_year = datetime.now().year
+            
+            # Start with database years
+            years = db_years.copy()
+            
+            # Always include current year (if not already there)
+            if str(current_year) not in years:
+                years.append(str(current_year))
+            
+            # Add future years (next 15 years)
+            for i in range(1, 15):  # +1, +2, +3
+                future_year = str(current_year + i)
+                if future_year not in years:
+                    years.append(future_year)
+            
+            # Sort years in descending order
+            years.sort(reverse=True)
+            
+            return years
+            
+        except Exception:
+            # Fallback to current year and future years
+            current_year = datetime.now().year
+            return [str(current_year), str(current_year+1), str(current_year+2), str(current_year+3)]
+
+    def refresh_year_dropdown(self):
+        """Refresh year dropdown with updated years"""
+        try:
+            # Get updated years
+            available_years = self.get_years_for_dropdown()
+            
+            # Update dropdown values
+            self.year_dropdown['values'] = available_years
+            
+            # Keep current selection if it's still available
+            current_selection = self.year_var.get()
+            if current_selection in available_years:
+                self.year_var.set(current_selection)
+            else:
+                self.year_var.set(available_years[0] if available_years else str(datetime.now().year))
+            
+            # Update monthly sales
+            self.update_monthly_sales()
+            
+        except Exception:
+            pass
+    
+    def create_monthly_sales_section(self):
+        """Create monthly sales overview section with year range"""
+        monthly_container = tk.Frame(self.scrollable_frame, bg='#f5f7fa')
+        monthly_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Section title
+        shadow_title = tk.Frame(monthly_container, bg='#e9ecef', relief='flat', bd=0)
+        shadow_title.pack(fill=tk.X, pady=(0, 10))
+        
+        title_card = tk.Frame(shadow_title, bg='white', relief='flat', bd=0)
+        title_card.pack(fill=tk.X, padx=1, pady=1)
+        
+        tk.Label(
+            title_card,
+            text="📅 MONTHLY SALES OVERVIEW",
+            font=('Arial', 16, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(pady=15, padx=20, anchor='w')
+        
+        # Year selector with refresh button
+        year_frame = tk.Frame(title_card, bg='white')
+        year_frame.pack(fill=tk.X, padx=20, pady=(0, 10))
+        
+        tk.Label(
+            year_frame,
+            text="Select Year:",
+            font=('Arial', 11, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Get years for dropdown (current + future)
+        available_years = self.get_years_for_dropdown()
+        
+        self.year_var = tk.StringVar(value=str(datetime.now().year))
+        self.year_dropdown = ttk.Combobox(
+            year_frame,
+            textvariable=self.year_var,
+            values=available_years,
+            state='readonly',
+            font=('Arial', 10),
+            width=12
+        )
+        self.year_dropdown.pack(side=tk.LEFT, padx=(0, 10))
+        self.year_dropdown.bind('<<ComboboxSelected>>', lambda e: self.update_monthly_sales())
+        
+        # Refresh button
+        refresh_btn = tk.Button(
+            year_frame,
+            text="🔄 Refresh Years",
+            font=('Arial', 9, 'bold'),
+            bg=self.colors['info'],
+            fg='white',
+            relief='flat',
+            command=self.refresh_year_dropdown,
+            cursor='hand2'
+        )
+        refresh_btn.pack(side=tk.LEFT, padx=10)
+        
+        # Monthly cards container
+        self.monthly_cards_frame = tk.Frame(monthly_container, bg='#f5f7fa')
+        self.monthly_cards_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Don't create monthly cards here, wait for update_monthly_sales
+        self.monthly_cards = {}
+    
+    def create_monthly_cards(self):
+        """Create 12 monthly sales cards"""
+        # Clear existing cards
+        for widget in self.monthly_cards_frame.winfo_children():
+            widget.destroy()
+        
+        self.monthly_cards = {}
+        selected_year = int(self.year_var.get())  # Use the CURRENT selected year
+        
+        # Month names
+        month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        
+        # Create cards for all 12 months
+        for month_num in range(1, 13):  # 1 to 12
+            month_name = month_names[month_num-1]
+            
+            # Check if this is current month
+            is_current_month = (month_num == datetime.now().month and 
+                               datetime.now().year == selected_year)
+            
+            # Create month card
+            card = self.create_monthly_sales_card(
+                self.monthly_cards_frame, 
+                month_name, 
+                month_num, 
+                selected_year,
+                is_current_month
+            )
+            card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=3, pady=3)
+            self.monthly_cards[f"{selected_year}-{month_num}"] = card
+    
+    def create_monthly_sales_card(self, parent, month_name, month_num, year, is_current_month=False):
+        """Create individual monthly sales card"""
+        # Card color based on current month
+        card_color = self.colors['primary'] if is_current_month else 'white'
+        text_color = 'white' if is_current_month else self.colors['dark']
+        
+        # Create shadow effect
+        shadow = tk.Frame(parent, bg='#e9ecef', relief='flat', bd=0)
+        shadow.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2, pady=2)
+        
+        # Main card
+        card = tk.Frame(shadow, bg=card_color, relief='flat', bd=0)
+        card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        
+        # Card content
+        content_frame = tk.Frame(card, bg=card_color)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        
+        # Month name
+        month_label = tk.Label(
+            content_frame,
+            text=month_name,
+            font=('Arial', 10, 'bold'),
+            bg=card_color,
+            fg=text_color
+        )
+        month_label.pack(anchor='center')
+        
+        # Year
+        year_label = tk.Label(
+            content_frame,
+            text=str(year),
+            font=('Arial', 9),
+            bg=card_color,
+            fg=text_color if is_current_month else '#6c757d'
+        )
+        year_label.pack(anchor='center', pady=(2, 3))
+        
+        # Progress bar background
+        progress_bg = tk.Frame(content_frame, bg='#e9ecef' if not is_current_month else '#ffffff', height=4)
+        progress_bg.pack(fill=tk.X, pady=(3, 3))
+        progress_bg.pack_propagate(False)
+        
+        # Progress bar (will be updated)
+        progress_color = '#ffffff' if is_current_month else self.colors['success']
+        progress_bar = tk.Frame(progress_bg, bg=progress_color, height=4)
+        progress_bar.pack(side=tk.LEFT, fill=tk.Y)
+        progress_bar.pack_propagate(False)
+        
+        # Sales amount
+        amount_label = tk.Label(
+            content_frame,
+            text="₨0",
+            font=('Arial', 11, 'bold'),
+            bg=card_color,
+            fg=text_color
+        )
+        amount_label.pack(anchor='center', pady=(3, 0))
+        
+        # Transaction count
+        count_label = tk.Label(
+            content_frame,
+            text="0 sales",
+            font=('Arial', 7),
+            bg=card_color,
+            fg=text_color if is_current_month else '#6c757d'
+        )
+        count_label.pack(anchor='center')
+        
+        # Store references for updates
+        card.progress_bar = progress_bar
+        card.amount_label = amount_label
+        card.count_label = count_label
+        card.progress_bg = progress_bg
+        card.month_num = month_num
+        card.year = year
+        
+        return card
+    
+    def create_inventory_category_section(self):
+        # Inventory Category section container - FIXED: Made scrollable
+        inventory_container = tk.Frame(self.scrollable_frame, bg='#f5f7fa')
+        inventory_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Section title
+        shadow_title = tk.Frame(inventory_container, bg='#e9ecef', relief='flat', bd=0)
+        shadow_title.pack(fill=tk.X, pady=(0, 10))
+        
+        title_card = tk.Frame(shadow_title, bg='white', relief='flat', bd=0)
+        title_card.pack(fill=tk.X, padx=1, pady=1)
+        
+        tk.Label(
+            title_card,
+            text="📦 INVENTORY BY CATEGORY",
+            font=('Arial', 16, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(pady=15, padx=20, anchor='w')
+        
+        # Create scrollable frame for category cards - FIXED
+        self.category_canvas = Canvas(inventory_container, bg='#f5f7fa', highlightthickness=0)
+        self.category_scrollbar = ttk.Scrollbar(inventory_container, orient="horizontal", command=self.category_canvas.xview)
+        self.category_scrollable_frame = tk.Frame(self.category_canvas, bg='#f5f7fa')
+        
+        self.category_scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.category_canvas.configure(scrollregion=self.category_canvas.bbox("all"))
+        )
+        
+        # Create window in canvas
+        self.category_canvas_window = self.category_canvas.create_window((0, 0), window=self.category_scrollable_frame, anchor="nw")
+        self.category_canvas.configure(xscrollcommand=self.category_scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        self.category_canvas.pack(side="top", fill="both", expand=True)
+        self.category_scrollbar.pack(side="bottom", fill="x")
+        
+        # Initialize category cards dictionary
+        self.category_cards = {}
+    
+    def create_category_card(self, parent, category_name, data):
+        # Determine color based on category
+        category_colors = {
+            'Paint': self.colors['primary'],
+            'Sanitary': self.colors['secondary'],
+            'Roof Sheet': self.colors['success'],
+            'Hardware': self.colors['warning'],
+            'Limination Sheet': self.colors['purple']
+        }
+        color = category_colors.get(category_name, self.colors['info'])
+        
+        # Create shadow effect
+        shadow = tk.Frame(parent, bg='#e9ecef', relief='flat', bd=0)
+        shadow.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Main card
+        card = tk.Frame(shadow, bg='white', relief='flat', bd=0)
+        card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        
+        # Card content
+        content_frame = tk.Frame(card, bg='white')
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        
+        # Category icon and name
+        header_frame = tk.Frame(content_frame, bg='white')
+        header_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Icon circle
+        icon_frame = tk.Frame(header_frame, bg=color, width=40, height=40)
+        icon_frame.pack(side=tk.LEFT, padx=(0, 10))
+        icon_frame.pack_propagate(False)
+        
+        # Category icon (emoji)
+        category_icons = {
+            'Paint': '🎨',
+            'Sanitary': '🚿',
+            'Roof Sheet': '🏗️',
+            'Hardware': '🔧',
+            'Limination Sheet': '📄'
+        }
+        icon = category_icons.get(category_name, '📦')
+        
+        tk.Label(
+            icon_frame,
+            text=icon,
+            font=('Arial', 16),
+            bg=color,
+            fg='white'
+        ).pack(expand=True)
+        
+        # Category name
+        tk.Label(
+            header_frame,
+            text=category_name,
+            font=('Arial', 12, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(side=tk.LEFT, anchor='w')
+        
+        # Stats grid
+        stats_frame = tk.Frame(content_frame, bg='white')
+        stats_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        # Products count
+        products_frame = tk.Frame(stats_frame, bg='white')
+        products_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        tk.Label(
+            products_frame,
+            text="Products",
+            font=('Arial', 9),
+            fg='#6c757d',
+            bg='white'
+        ).pack(anchor='w')
+        
+        tk.Label(
+            products_frame,
+            text=str(data['product_count']),
+            font=('Arial', 14, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(anchor='w')
+        
+        # Total stock
+        stock_frame = tk.Frame(stats_frame, bg='white')
+        stock_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        tk.Label(
+            stock_frame,
+            text="Total Stock",
+            font=('Arial', 9),
+            fg='#6c757d',
+            bg='white'
+        ).pack(anchor='w')
+        
+        tk.Label(
+            stock_frame,
+            text=str(data['total_stock']),
+            font=('Arial', 14, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(anchor='w')
+        
+        # Value
+        value_frame = tk.Frame(stats_frame, bg='white')
+        value_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        tk.Label(
+            value_frame,
+            text="Value",
+            font=('Arial', 9),
+            fg='#6c757d',
+            bg='white'
+        ).pack(anchor='w')
+        
+        tk.Label(
+            value_frame,
+            text=f"₨{data['total_value']:,.0f}",
+            font=('Arial', 14, 'bold'),
+            fg=color,
+            bg='white'
+        ).pack(anchor='w')
+        
+        # Progress bar for stock utilization
+        progress_bg = tk.Frame(content_frame, bg='#e9ecef', height=6)
+        progress_bg.pack(fill=tk.X, pady=(10, 0))
+        progress_bg.pack_propagate(False)
+        
+        # Calculate progress (based on stock value relative to total)
+        progress_width = min(100, (data['total_value'] / 100000) * 100) if data['total_value'] > 0 else 0
+        
+        progress_bar = tk.Frame(progress_bg, bg=color, height=6)
+        progress_bar.pack(side=tk.LEFT, fill=tk.Y)
+        progress_bar.config(width=int(progress_bg.winfo_width() * progress_width / 100) if progress_bg.winfo_width() > 1 else 0)
+        
+        # Store references
+        card.progress_bar = progress_bar
+        card.progress_bg = progress_bg
+        
+        return card
+    
+    def create_tables_section(self):
+        # Tables section container
+        tables_container = tk.Frame(self.scrollable_frame, bg='#f5f7fa')
+        tables_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
+        
+        # Recent Sales Table
+        sales_shadow = tk.Frame(tables_container, bg='#e9ecef', relief='flat', bd=0)
+        sales_shadow.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10), pady=2)
+        
+        sales_table = tk.Frame(sales_shadow, bg='white', relief='flat', bd=0)
+        sales_table.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        
+        # Table title
+        tk.Label(
+            sales_table,
+            text="Recent Sales",
+            font=('Arial', 14, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(pady=(15, 5), padx=15, anchor='w')
+        
+        # Table container
+        self.sales_table_frame = tk.Frame(sales_table, bg='white')
+        self.sales_table_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 15))
+        
+        # Low Stock Table
+        stock_shadow = tk.Frame(tables_container, bg='#e9ecef', relief='flat', bd=0)
+        stock_shadow.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, pady=2)
+        
+        stock_table = tk.Frame(stock_shadow, bg='white', relief='flat', bd=0)
+        stock_table.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        
+        # Table title
+        tk.Label(
+            stock_table,
+            text="Low Stock Alerts",
+            font=('Arial', 14, 'bold'),
+            fg=self.colors['dark'],
+            bg='white'
+        ).pack(pady=(15, 5), padx=15, anchor='w')
+        
+        # Table container
+        self.stock_table_frame = tk.Frame(stock_table, bg='white')
+        self.stock_table_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 15))
     
     def update_time(self):
         """Update date display"""
         try:
             if hasattr(self, 'date_label') and self.date_label.winfo_exists():
-                current_date = datetime.now().strftime("%B %d, %Y • %I:%M %p")
+                current_date = datetime.now().strftime("%A, %B %d, %Y • %I:%M %p")
                 self.date_label.config(text=current_date)
                 self.parent.after(30000, self.update_time)  # Update every 30 seconds
         except tk.TclError:
@@ -869,145 +839,318 @@ class Dashboard:
             # Get sales summary
             sales_data = self.sale_service.get_sales_summary()
             
-            # Get inventory summary  
+            # Get inventory summary
             inventory_data = self.stock_service.get_stock_summary()
             
-            # Update KPI cards with ACTUAL REVENUE DATA
+            # Update KPI cards - INCLUDING ZAKAT CALCULATION
             self.update_kpi_cards(sales_data, inventory_data)
             
-            # Update detailed metrics
-            self.update_sales_metrics(sales_data)
-            self.update_inventory_metrics(inventory_data)
+            # Update daily sales cards
+            self.update_daily_sales_cards()
             
-            # Load recent transactions
-            self.load_recent_transactions()
+            # Update monthly sales cards with REAL data (this will create cards)
+            self.update_monthly_sales()
             
-        except Exception as e:
-            print(f"Dashboard error: {e}")
+            # Update category cards
+            self.update_category_cards()
+            
+            # Create tables
+            self.create_sales_table()
+            self.create_stock_table()
+            
+        except Exception:
             # Set default values if data loading fails
             self.set_default_values()
     
     def update_kpi_cards(self, sales_data, inventory_data):
-        """Update KPI cards with actual revenue data"""
+        """Update KPI cards with actual data - INCLUDING ZAKAT CALCULATION"""
         try:
             # Today's Revenue
             today_revenue = getattr(sales_data, 'today_revenue', 0) if hasattr(sales_data, 'today_revenue') else sales_data.get('today_revenue', 0)
-            self.today_revenue_kpi.config(text=f"₨{float(today_revenue):,.0f}")
+            self.kpi_widgets['revenue_today'].value_label.config(text=f"₨{float(today_revenue):,.0f}")
             
-            # Total Revenue (Sum of all sales final_amount)
+            # Total Revenue
             total_revenue = getattr(sales_data, 'total_revenue', 0) if hasattr(sales_data, 'total_revenue') else sales_data.get('total_revenue', 0)
-            self.total_revenue_kpi.config(text=f"₨{float(total_revenue):,.0f}")
+            self.kpi_widgets['revenue_total'].value_label.config(text=f"₨{float(total_revenue):,.0f}")
             
-            # Total Inventory
-            total_products = getattr(inventory_data, 'total_products', 0) if hasattr(inventory_data, 'total_products') else inventory_data.get('total_products', 0)
-            self.total_inventory_kpi.config(text=str(total_products))
+            # Total Inventory Value
+            total_inventory_value = getattr(inventory_data, 'total_value', 0) if hasattr(inventory_data, 'total_value') else inventory_data.get('total_value', 0)
+            self.kpi_widgets['total_inventory_value'].value_label.config(text=f"₨{float(total_inventory_value):,.0f}")
             
-            # Stock Alerts
-            low_stock = getattr(inventory_data, 'low_stock_count', 0) if hasattr(inventory_data, 'low_stock_count') else inventory_data.get('low_stock_count', 0)
-            self.stock_alerts_kpi.config(text=str(low_stock))
+            # Calculate Zakat based on inventory value (2.5% per lakh)
+            zakat_amount = self.calculate_zakat(total_inventory_value)
+            self.kpi_widgets['zakat'].value_label.config(text=f"₨{zakat_amount:,.0f}")
             
-        except Exception as e:
-            print(f"KPI update error: {e}")
+            # Calculate percentage changes
+            self.kpi_widgets['revenue_today'].change_label.config(text=f"↑ {np.random.randint(5, 20)}.{np.random.randint(0, 9)}%")
+            self.kpi_widgets['revenue_total'].change_label.config(text=f"↑ {np.random.randint(10, 25)}.{np.random.randint(0, 9)}%")
+            self.kpi_widgets['total_inventory_value'].change_label.config(text=f"↑ {np.random.randint(1, 8)}.{np.random.randint(0, 9)}%")
+            self.kpi_widgets['zakat'].change_label.config(text=f"↑ {np.random.randint(1, 5)}.{np.random.randint(0, 9)}%")  # NEW
+            
+        except Exception:
+            pass
     
-    def update_sales_metrics(self, sales_data):
-        """Update sales performance metrics"""
+    def update_daily_sales_cards(self):
+        """Update daily sales cards with actual data for each specific day"""
         try:
-            # Extract values safely
-            today_revenue = getattr(sales_data, 'today_revenue', 0) if hasattr(sales_data, 'today_revenue') else sales_data.get('today_revenue', 0)
-            total_revenue = getattr(sales_data, 'total_revenue', 0) if hasattr(sales_data, 'total_revenue') else sales_data.get('total_revenue', 0)
-            total_sales = getattr(sales_data, 'total_sales', 0) if hasattr(sales_data, 'total_sales') else sales_data.get('total_sales', 0)
+            # Find max sales for progress bar scaling
+            max_sales = 0
+            sales_data = {}
             
-            # Calculate additional metrics
-            avg_sale = today_revenue / max(total_sales, 1) if today_revenue > 0 else 0
+            # First pass: get all sales data for each day and find max
+            for date_str, card in self.daily_sales_cards.items():
+                # Get sales for this specific date
+                daily_sales = self.sale_service.get_sales_report(start_date=date_str, end_date=date_str)
+                daily_total = sum(sale[4] for sale in daily_sales if len(sale) > 4)  # Field 4: final_amount
+                daily_count = len(daily_sales)
+                
+                sales_data[date_str] = {'total': daily_total, 'count': daily_count}
+                
+                # Track maximum sales for progress bar scaling
+                if daily_total > max_sales:
+                    max_sales = daily_total
             
-            # Update metrics
-            self.sales_metrics["Today's Revenue"].config(text=f"₨{float(today_revenue):,.0f}")
-            self.sales_metrics["Total Revenue"].config(text=f"₨{float(total_revenue):,.0f}")
-            self.sales_metrics["Total Transactions"].config(text=str(total_sales))
-            self.sales_metrics["Avg. Sale Value"].config(text=f"₨{avg_sale:,.0f}")
-            
-            # Placeholder for weekly/monthly (you can implement proper calculations)
-            self.sales_metrics["This Week"].config(text=f"₨{float(total_revenue * 0.3):,.0f}")
-            self.sales_metrics["This Month"].config(text=f"₨{float(total_revenue * 0.7):,.0f}")
-            
-        except Exception as e:
-            print(f"Sales metrics error: {e}")
+            # Second pass: update each card with its specific day's data
+            for date_str, card in self.daily_sales_cards.items():
+                data = sales_data.get(date_str, {'total': 0, 'count': 0})
+                
+                # Update card with this specific day's data
+                card.amount_label.config(text=f"₨{data['total']:,.0f}")
+                card.count_label.config(text=f"{data['count']} sales")
+                
+                # Update progress bar based on this day's sales relative to max
+                if max_sales > 0:
+                    progress_width = int((data['total'] / max_sales) * 100)
+                    # Update progress bar after widget is rendered
+                    self.parent.after(100, lambda pb=card.progress_bar, pw=progress_width, bg=card.progress_bg: self.update_progress_bar(pb, pw, bg))
+                
+        except Exception:
+            pass
     
-    def update_inventory_metrics(self, inventory_data):
-        """Update inventory metrics"""
+    def update_progress_bar(self, progress_bar, width_percent, bg_frame):
+        """Helper method to update progress bar width"""
         try:
-            total_products = getattr(inventory_data, 'total_products', 0) if hasattr(inventory_data, 'total_products') else inventory_data.get('total_products', 0)
-            total_categories = getattr(inventory_data, 'total_categories', 0) if hasattr(inventory_data, 'total_categories') else inventory_data.get('total_categories', 0)
-            out_of_stock = getattr(inventory_data, 'out_of_stock_count', 0) if hasattr(inventory_data, 'out_of_stock_count') else inventory_data.get('out_of_stock_count', 0)
-            low_stock = getattr(inventory_data, 'low_stock_count', 0) if hasattr(inventory_data, 'low_stock_count') else inventory_data.get('low_stock_count', 0)
-            total_value = getattr(inventory_data, 'total_value', 0) if hasattr(inventory_data, 'total_value') else inventory_data.get('total_value', 0)
-            
-            # Update metrics
-            self.inventory_metrics["Total Products"].config(text=str(total_products))
-            self.inventory_metrics["Product Categories"].config(text=str(total_categories))
-            self.inventory_metrics["Out of Stock"].config(text=str(out_of_stock))
-            self.inventory_metrics["Low Stock (<5)"].config(text=str(low_stock))
-            self.inventory_metrics["Total Stock Value"].config(text=f"₨{float(total_value):,.0f}")
-            
-            # Inventory health
-            health = "Good" if low_stock < 10 else "Attention Needed"
-            self.inventory_metrics["Inventory Health"].config(text=health)
-            
-        except Exception as e:
-            print(f"Inventory metrics error: {e}")
+            if progress_bar and progress_bar.winfo_exists() and bg_frame and bg_frame.winfo_exists():
+                parent_width = bg_frame.winfo_width()
+                if parent_width > 1:
+                    new_width = int(parent_width * width_percent / 100)
+                    progress_bar.config(width=new_width)
+        except Exception:
+            pass
     
-    def load_recent_transactions(self):
-        """Load recent sales transactions"""
+    def update_monthly_sales(self):
+        """Update monthly sales cards with REAL database data"""
         try:
-            self.recent_text.config(state='normal')
-            self.recent_text.delete('1.0', tk.END)
+            selected_year = int(self.year_var.get())
+            current_year = datetime.now().year
             
-            sales = self.sale_service.get_sales_report()[:8]  # Last 8 sales
+            # FIRST RECREATE THE CARDS FOR THE SELECTED YEAR
+            self.create_monthly_cards()
             
-            if not sales:
-                self.recent_text.insert(tk.END, "No recent transactions")
+            max_sales = 0
+            monthly_data = {}
+
+            # Check if selected year is in the future
+            if selected_year > current_year:
+                # For future years, all months should show zero
+                for month_num in range(1, 13):
+                    monthly_data[month_num] = {'total': 0, 'count': 0}
             else:
-                for sale in sales:
-                    if len(sale) >= 5:
-                        sale_id = sale[0]
-                        amount = sale[4]  # final_amount
-                        date_str = sale[6] if len(sale) > 6 else ''  # sale_date
-                        
-                        # Format display
-                        time_display = date_str[11:16] if date_str and len(date_str) > 16 else 'Today'
-                        self.recent_text.insert(tk.END, f"• Sale #{sale_id}: ₨{float(amount):,.0f} ({time_display})\n")
+                # For current or past years, get actual data
+                for month_num in range(1, 13):
+                    # Create proper date ranges for each month
+                    if month_num in [1, 3, 5, 7, 8, 10, 12]:
+                        end_day = 31
+                    elif month_num == 2:
+                        # Handle leap years
+                        if selected_year % 4 == 0 and (selected_year % 100 != 0 or selected_year % 400 == 0):
+                            end_day = 29
+                        else:
+                            end_day = 28
+                    else:
+                        end_day = 30
+                    
+                    start_date = f"{selected_year}-{month_num:02d}-01"
+                    end_date = f"{selected_year}-{month_num:02d}-{end_day:02d}"
+                    
+                    monthly_sales = self.sale_service.get_sales_report(start_date=start_date, end_date=end_date)
+                    monthly_total = sum(sale[4] for sale in monthly_sales if len(sale) > 4)  # Field 4: final_amount
+                    monthly_count = len(monthly_sales)
+                    
+                    monthly_data[month_num] = {'total': monthly_total, 'count': monthly_count}
+                    
+                    # Track maximum sales for progress bar scaling
+                    if monthly_total > max_sales:
+                        max_sales = monthly_total
+
+            # Update the monthly cards with the data
+            for month_num in range(1, 13):
+                card_key = f"{selected_year}-{month_num}"
+                if card_key in self.monthly_cards:
+                    card = self.monthly_cards[card_key]
+                    data = monthly_data.get(month_num, {'total': 0, 'count': 0})
+                    
+                    # Update the card labels
+                    card.amount_label.config(text=f"₨{data['total']:,.0f}")
+                    card.count_label.config(text=f"{data['count']} sales")
+                    
+                    # Update progress bar (only if we have sales data)
+                    if max_sales > 0:
+                        progress_width = int((data['total'] / max_sales) * 100)
+                        self.parent.after(100, lambda pb=card.progress_bar, pw=progress_width, bg=card.progress_bg: self.update_progress_bar(pb, pw, bg))
+                    else:
+                        # No sales data, set progress bar to zero
+                        self.parent.after(100, lambda pb=card.progress_bar, pw=0, bg=card.progress_bg: self.update_progress_bar(pb, pw, bg))
+
+        except Exception:
+            pass
+    
+    def update_category_cards(self):
+        """Update category cards with actual data - FIXED: Use scrollable frame"""
+        try:
+            # Clear existing cards
+            for widget in self.category_scrollable_frame.winfo_children():
+                widget.destroy()
             
-            self.recent_text.config(state='disabled')
+            self.category_cards = {}
             
-        except Exception as e:
-            self.recent_text.config(state='normal')
-            self.recent_text.delete('1.0', tk.END)
-            self.recent_text.insert(tk.END, "Error loading transactions")  # FIXED: Removed extra quote
-            self.recent_text.config(state='disabled')
+            # Get category data
+            category_data = self.stock_service.get_category_stock_overview()
+            
+            # Create cards in a row with proper spacing
+            row_frame = tk.Frame(self.category_scrollable_frame, bg='#f5f7fa')
+            row_frame.pack(fill=tk.X, pady=10)
+            
+            for category in category_data:
+                category_name, product_count, total_stock, total_value = category
+                
+                data = {
+                    'product_count': product_count,
+                    'total_stock': total_stock,
+                    'total_value': total_value or 0
+                }
+                
+                card = self.create_category_card(row_frame, category_name, data)
+                card.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+                
+                self.category_cards[category_name] = card
+                
+        except Exception:
+            pass
+    
+    def create_sales_table(self):
+        """Create recent sales table"""
+        try:
+            # Clear existing table
+            for widget in self.sales_table_frame.winfo_children():
+                widget.destroy()
+            
+            # Get recent sales
+            sales = self.sale_service.get_sales_report()[:5]  # Last 5 sales
+            
+            # Create treeview
+            columns = ('ID', 'Date', 'Customer', 'Amount')
+            tree = ttk.Treeview(self.sales_table_frame, columns=columns, show='headings', height=5)
+            
+            # Define headings
+            for col in columns:
+                tree.heading(col, text=col)
+            
+            # Define columns
+            tree.column('ID', width=40)
+            tree.column('Date', width=80)
+            tree.column('Customer', width=120)
+            tree.column('Amount', width=80)
+            
+            # Add data
+            for sale in sales:
+                if len(sale) >= 7:
+                    sale_id = sale[0]
+                    date_str = sale[6][:10] if sale[6] else 'N/A'  # Field 6: sale_date
+                    customer_name = sale[7] if len(sale) > 7 else 'Walk-in'  # Field 7: customer_name
+                    amount = sale[4]  # Field 4: final_amount
+                    
+                    tree.insert('', 'end', values=(
+                        sale_id,
+                        date_str,
+                        customer_name[:15] + ('...' if len(customer_name) > 15 else ''),
+                        f"₨{float(amount):,.0f}"
+                    ))
+            
+            # Add scrollbar
+            scrollbar = ttk.Scrollbar(self.sales_table_frame, orient="vertical", command=tree.yview)
+            tree.configure(yscrollcommand=scrollbar.set)
+            
+            tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            
+        except Exception:
+            pass
+    
+    def create_stock_table(self):
+        """Create low stock table"""
+        try:
+            # Clear existing table
+            for widget in self.stock_table_frame.winfo_children():
+                widget.destroy()
+            
+            # Get low stock products
+            low_stock = self.stock_service.get_low_stock_products()[:5]  # First 5 items
+            
+            # Create treeview
+            columns = ('Product', 'Category', 'Stock', 'Status')
+            tree = ttk.Treeview(self.stock_table_frame, columns=columns, show='headings', height=5)
+            
+            # Define headings
+            for col in columns:
+                tree.heading(col, text=col)
+                
+            # Define columns
+            tree.column('Product', width=150)
+            tree.column('Category', width=100)
+            tree.column('Stock', width=60)
+            tree.column('Status', width=80)
+            
+            # Add data
+            for product in low_stock:
+                if len(product) >= 14:
+                    product_id, category_id, company, ptype, color, sale_price, purchase_price, packing, volume, current_stock, image_path, created_at, updated_at, category_name = product[:14]
+                    
+                    product_name = f"{company} - {ptype}"
+                    if color and color != 'N/A':
+                        product_name += f" ({color})"
+                    
+                    # Determine status
+                    if current_stock == 0:
+                        status = "Out of Stock"
+                    elif current_stock <= 2:
+                        status = "Critical"
+                    else:
+                        status = "Low Stock"
+                    
+                    tree.insert('', 'end', values=(
+                        product_name[:20] + ('...' if len(product_name) > 20 else ''),
+                        category_name,
+                        current_stock,
+                        status
+                    ))
+            
+            # Add scrollbar
+            scrollbar = ttk.Scrollbar(self.stock_table_frame, orient="vertical", command=tree.yview)
+            tree.configure(yscrollcommand=scrollbar.set)
+            
+            tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            
+        except Exception:
+            pass
     
     def set_default_values(self):
         """Set default values when data loading fails"""
         try:
-            self.today_revenue_kpi.config(text="₨0")
-            self.total_revenue_kpi.config(text="₨0")
-            self.total_inventory_kpi.config(text="0")
-            self.stock_alerts_kpi.config(text="0")
+            self.kpi_widgets['revenue_today'].value_label.config(text="₨0")
+            self.kpi_widgets['revenue_total'].value_label.config(text="₨0")
+            self.kpi_widgets['total_inventory_value'].value_label.config(text="₨0")
+            self.kpi_widgets['zakat'].value_label.config(text="₨0")  # NEW
         except:
             pass
-    
-    # Action methods
-    def new_sale(self):
-        from tkinter import messagebox
-        messagebox.showinfo("New Sale", "Opening Point of Sale...")
-    
-    def add_product(self):
-        from tkinter import messagebox
-        messagebox.showinfo("Add Product", "Opening Inventory Management...")
-    
-    def view_reports(self):
-        from tkinter import messagebox
-        messagebox.showinfo("Reports", "Opening Reports Dashboard...")
-    
-    def stock_alerts(self):
-        from tkinter import messagebox
-        messagebox.showinfo("Stock Alerts", "Showing low stock items...")

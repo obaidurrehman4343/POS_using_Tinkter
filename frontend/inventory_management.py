@@ -33,6 +33,20 @@ class InventoryManagement:
             bg='white'
         ).pack(side=tk.LEFT)
         
+        # Delete Category Button
+        self.delete_category_btn = tk.Button(
+            header_frame,
+            text="🗑️ Delete Category",
+            font=('Arial', 11),
+            bg='#e74c3c',
+            fg='white',
+            relief='flat',
+            command=self.delete_category,
+            cursor='hand2',
+            state='disabled'  # Disabled until category is selected
+        )
+        self.delete_category_btn.pack(side=tk.RIGHT, padx=(10, 0))
+        
         # Add Category Button
         add_category_btn = tk.Button(
             header_frame,
@@ -44,7 +58,7 @@ class InventoryManagement:
             command=self.add_category,
             cursor='hand2'
         )
-        add_category_btn.pack(side=tk.RIGHT, padx=(10, 0))
+        add_category_btn.pack(side=tk.RIGHT, padx=(0, 10))
         
         # Add Product Button
         self.add_product_btn = tk.Button(
@@ -127,7 +141,7 @@ class InventoryManagement:
             messagebox.showerror("Error", f"Failed to load categories: {str(e)}")
 
     def on_category_select(self, event=None):
-        """Handle category selection - FIXED METHOD NAME"""
+        """Handle category selection"""
         category_name = self.category_var.get()
         if category_name:
             self.selected_category_name = category_name
@@ -138,14 +152,15 @@ class InventoryManagement:
                 if category_id:
                     self.current_category = category_id
                     self.add_product_btn.config(state='normal')
-                    self.load_products(category_id)  # ✅ CORRECT METHOD NAME
+                    self.delete_category_btn.config(state='normal')  # Enable delete button
+                    self.load_products(category_id)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load category: {str(e)}")
         else:
             self.current_category = None
             self.add_product_btn.config(state='disabled')
+            self.delete_category_btn.config(state='disabled')  # Disable delete button
             self.show_select_category_message()
-        
     def show_select_category_message(self):
         """Show message when no category is selected"""
         for widget in self.products_container.winfo_children():
@@ -195,74 +210,60 @@ class InventoryManagement:
         ).pack(expand=True, pady=10)
 
     def add_category(self):
-        """Add new category dialog"""
+        """Add new category dialog - COMPACT VERSION"""
         dialog = tk.Toplevel(self.parent)
         dialog.title("Add New Category")
-        dialog.geometry("400x200")
+        dialog.geometry("350x180")  # Smaller size
         dialog.configure(bg='white')
         dialog.transient(self.parent)
         dialog.grab_set()
         
         # Center dialog
         dialog.update_idletasks()
-        x = (dialog.winfo_screenwidth() // 2) - (400 // 2)
-        y = (dialog.winfo_screenheight() // 2) - (200 // 2)
-        dialog.geometry(f"400x200+{x}+{y}")
+        x = (dialog.winfo_screenwidth() // 2) - (350 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (180 // 2)
+        dialog.geometry(f'350x180+{x}+{y}')
         
+        # Title
         tk.Label(
             dialog,
             text="Add New Category",
-            font=('Arial', 16, 'bold'),
+            font=('Arial', 14, 'bold'),  # Smaller font
             fg='#2c3e50',
             bg='white'
-        ).pack(pady=20)
+        ).pack(pady=(15, 8))  # Reduced padding
         
         # Category Name
         name_frame = tk.Frame(dialog, bg='white')
-        name_frame.pack(fill=tk.X, padx=30, pady=10)
+        name_frame.pack(fill=tk.X, padx=30, pady=(0, 15))  # Reduced padding
         
         tk.Label(
             name_frame,
             text="Category Name:",
-            font=('Arial', 11, 'bold'),
+            font=('Arial', 11, 'bold'),  # Smaller font
             fg='#2c3e50',
             bg='white'
-        ).pack(anchor='w')
+        ).pack(anchor='w', pady=(0, 5))  # Reduced padding
         
         name_entry = tk.Entry(
             name_frame,
-            font=('Arial', 12),
+            font=('Arial', 11),  # Smaller font
             relief='solid',
-            bd=1
+            bd=1,
+            width=25  # Smaller width
         )
-        name_entry.pack(fill=tk.X, pady=(5, 0), ipady=5)
-        
-        # Description
-        desc_frame = tk.Frame(dialog, bg='white')
-        desc_frame.pack(fill=tk.X, padx=30, pady=10)
-        
-        tk.Label(
-            desc_frame,
-            text="Description (Optional):",
-            font=('Arial', 11, 'bold'),
-            fg='#2c3e50',
-            bg='white'
-        ).pack(anchor='w')
-        
-        desc_entry = tk.Entry(
-            desc_frame,
-            font=('Arial', 12),
-            relief='solid',
-            bd=1
-        )
-        desc_entry.pack(fill=tk.X, pady=(5, 0), ipady=5)
+        name_entry.pack(fill=tk.X, ipady=5)  # Reduced padding
         
         def save_category():
             name = name_entry.get().strip()
-            description = desc_entry.get().strip()
             
+            if not name:
+                messagebox.showerror("Error", "Category name is required!")
+                name_entry.focus()
+                return
+                
             try:
-                self.category_service.add_category(name, description)
+                self.category_service.add_category(name, "")  # Empty description
                 messagebox.showinfo("Success", f"Category '{name}' added successfully!")
                 dialog.destroy()
                 
@@ -275,34 +276,45 @@ class InventoryManagement:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to add category: {str(e)}")
         
-        # Buttons
+        # Buttons - COMPACT LAYOUT
         button_frame = tk.Frame(dialog, bg='white')
-        button_frame.pack(fill=tk.X, padx=30, pady=20)
+        button_frame.pack(fill=tk.X, padx=30, pady=(10, 15))  # Reduced padding
         
-        save_btn = tk.Button(
-            button_frame,
-            text="Save Category",
-            font=('Arial', 11, 'bold'),
-            bg='#27ae60',
-            fg='white',
-            relief='flat',
-            command=save_category
-        )
-        save_btn.pack(side=tk.RIGHT, padx=(10, 0))
-        
+        # Cancel button
         cancel_btn = tk.Button(
             button_frame,
             text="Cancel",
-            font=('Arial', 11),
+            font=('Arial', 10, 'bold'),  # Smaller font
             bg='#95a5a6',
             fg='white',
-            relief='flat',
+            relief='raised',
+            width=8,  # Smaller width
+            height=1,  # Smaller height
             command=dialog.destroy
         )
-        cancel_btn.pack(side=tk.RIGHT)
+        cancel_btn.pack(side=tk.LEFT, padx=(0, 10))
         
+        # Save button
+        save_btn = tk.Button(
+            button_frame,
+            text="Save",  # Shorter text
+            font=('Arial', 10, 'bold'),  # Smaller font
+            bg='#27ae60',
+            fg='white',
+            relief='raised',
+            width=8,  # Smaller width
+            height=1,  # Smaller height
+            command=save_category
+        )
+        save_btn.pack(side=tk.RIGHT)
+        
+        # Bind Enter key to save
+        def on_enter_key(event):
+            save_category()
+        
+        dialog.bind('<Return>', on_enter_key)
         name_entry.focus()
-
+        
     def add_product(self):
         """Add new product using universal form - FIXED METHOD"""
         if not self.current_category:
@@ -713,6 +725,50 @@ class InventoryManagement:
                     messagebox.showerror("Error", "Failed to delete product!")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to delete product: {str(e)}")
+    def delete_category(self):
+        """Delete selected category"""
+        if not self.current_category or not self.selected_category_name:
+            messagebox.showwarning("Warning", "Please select a category to delete!")
+            return
+        
+        category_name = self.selected_category_name
+        
+        # Check if category has products
+        try:
+            products = self.product_service.get_products_by_category(self.current_category)
+            if products:
+                result = messagebox.askyesno(
+                    "Confirm Delete", 
+                    f"Category '{category_name}' contains {len(products)} products!\n\n"
+                    f"Deleting this category will also delete all products in it.\n\n"
+                    f"Are you sure you want to delete this category and all its products?"
+                )
+            else:
+                result = messagebox.askyesno(
+                    "Confirm Delete", 
+                    f"Are you sure you want to delete category '{category_name}'?"
+                )
+            
+            if result:
+                # Delete category (this should cascade delete products in database)
+                # You need to implement delete_category in your CategoryService
+                success = self.category_service.delete_category(self.current_category)
+                
+                if success:
+                    messagebox.showinfo("Success", f"Category '{category_name}' deleted successfully!")
+                    # Reset selection
+                    self.current_category = None
+                    self.selected_category_name = None
+                    self.category_var.set('')
+                    self.add_product_btn.config(state='disabled')
+                    self.delete_category_btn.config(state='disabled')
+                    self.load_categories()
+                    self.show_select_category_message()
+                else:
+                    messagebox.showerror("Error", f"Failed to delete category '{category_name}'!")
+                    
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to delete category: {str(e)}")
 
     def validate_number(self, value):
         """Validate number input"""

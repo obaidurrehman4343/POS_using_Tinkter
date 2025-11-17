@@ -39,3 +39,25 @@ class CategoryService:
             if cat[0] == category_id:
                 return cat
         return None
+    def delete_category(self, category_id):
+        """Delete category by ID"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # First check if category has products
+                cursor.execute('SELECT COUNT(*) FROM products WHERE category_id = ?', (category_id,))
+                product_count = cursor.fetchone()[0]
+                
+                if product_count > 0:
+                    # Delete products first (due to foreign key constraint)
+                    cursor.execute('DELETE FROM products WHERE category_id = ?', (category_id,))
+                
+                # Delete the category
+                cursor.execute('DELETE FROM categories WHERE id = ?', (category_id,))
+                conn.commit()
+                
+                return True
+        except Exception as e:
+            print(f"Error deleting category: {e}")
+            return False

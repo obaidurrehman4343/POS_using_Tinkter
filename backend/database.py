@@ -1,7 +1,6 @@
-
 import sqlite3
 from datetime import datetime
-
+import pytz 
 class Database:
     def __init__(self, db_path='awan_hardware.db'):
         self.db_path = db_path
@@ -9,6 +8,13 @@ class Database:
         
     def get_connection(self):
         return sqlite3.connect(self.db_path)
+    def get_pakistan_time(self):
+        """Get current Pakistan time - FIXED: Consistent implementation"""
+        try:
+            pakistan_tz = pytz.timezone('Asia/Karachi')
+            return datetime.now(pakistan_tz).strftime('%Y-%m-%d %H:%M:%S')
+        except:
+            return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
     def init_database(self):
         with self.get_connection() as conn:
@@ -79,11 +85,61 @@ class Database:
                     quantity INTEGER NOT NULL,
                     unit_price DECIMAL(10,2) NOT NULL,
                     total_price DECIMAL(10,2) NOT NULL,
+                    purchase_price DECIMAL(10,2) NOT NULL DEFAULT 0,
                     FOREIGN KEY (sale_id) REFERENCES sales (id),
                     FOREIGN KEY (product_id) REFERENCES products (id)
                 )
+                
             ''')
-            
+            cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS customer_udhar (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        customer_name TEXT NOT NULL,
+                        phone TEXT,
+                        total_amount DECIMAL(10,2) NOT NULL,
+                        paid_amount DECIMAL(10,2) DEFAULT 0,
+                        remaining_balance DECIMAL(10,2) NOT NULL,
+                        created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        status TEXT DEFAULT 'UNPAID'
+                    )
+''')
+            cursor.execute('''
+                        CREATE TABLE IF NOT EXISTS supplier_udhar (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            supplier_name TEXT NOT NULL,
+                            phone TEXT,
+                            total_amount DECIMAL(10,2) NOT NULL,
+                            paid_amount DECIMAL(10,2) DEFAULT 0,
+                            remaining_balance DECIMAL(10,2) NOT NULL,
+                            created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            status TEXT DEFAULT 'UNPAID',
+                            type TEXT DEFAULT 'Supplier'
+                        )
+''')
+            cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        role TEXT NOT NULL DEFAULT 'cashier',
+                        full_name TEXT NOT NULL,
+                        phone TEXT,
+                        is_active INTEGER DEFAULT 1,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        last_login DATETIME
+            )
+        ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS backup_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    filename TEXT NOT NULL,
+                    backup_path TEXT NOT NULL,
+                    file_size INTEGER,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER,
+                    FOREIGN KEY (created_by) REFERENCES users (id)
+            )
+        ''')
             # Insert default categories
             categories = [
                 ('Paint', 'All types of paints and colors'),
@@ -127,14 +183,17 @@ class Database:
             return cursor.lastrowid
         
     def add_product(self, product_data):
-        """Add product with correct number of columns"""
+        """Add product with Pakistan time"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            
+            pakistan_time = self.get_pakistan_time()
+            
             cursor.execute('''
                 INSERT INTO products 
                 (category_id, company, type, color, sale_price, purchase_price, 
-                 packing, volume, current_stock, image_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 packing, volume, current_stock, image_path, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 product_data['category_id'],
                 product_data['company'],
@@ -145,7 +204,9 @@ class Database:
                 product_data.get('packing', ''),
                 product_data.get('volume', ''),
                 product_data.get('current_stock', 0),
-                product_data.get('image_path', '')
+                product_data.get('image_path', ''),
+                pakistan_time,
+                pakistan_time
             ))
             return cursor.lastrowid
         
@@ -211,14 +272,17 @@ class Database:
             cursor.execute('SELECT * FROM customers ORDER BY name')
             return cursor.fetchall()
     
-    def add_customer(self, name, phone, email, address):
-        """Add new customer"""
+    def add_customer(self, name, phone, email="", address=""):
+        """Add new customer with Pakistan time"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            
+            pakistan_time = self.get_pakistan_time()
+            
             cursor.execute('''
-                INSERT INTO customers (name, phone, email, address)
-                VALUES (?, ?, ?, ?)
-            ''', (name, phone, email, address))
+                INSERT INTO customers (name, phone, email, address, created_at)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (name, phone, email, address, pakistan_time))
             return cursor.lastrowid
     
     def create_sale(self, customer_id, total_amount, discount, final_amount, payment_method='cash'):
@@ -231,14 +295,21 @@ class Database:
             ''', (customer_id, total_amount, discount, final_amount, payment_method))
             return cursor.lastrowid
     
-    def add_sale_item(self, sale_id, product_id, quantity, unit_price, total_price):
-        """Add item to a sale"""
+    def add_sale_item(self, sale_id, product_id, quantity, unit_price, total_price, purchase_price=0):
+        """Add item to a sale with purchase price for profit calculation"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # If purchase_price not provided, get it from products table
+            if purchase_price == 0:
+                cursor.execute('SELECT purchase_price FROM products WHERE id = ?', (product_id,))
+                result = cursor.fetchone()
+                purchase_price = result[0] if result else 0
+            
             cursor.execute('''
-                INSERT INTO sale_items (sale_id, product_id, quantity, unit_price, total_price)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (sale_id, product_id, quantity, unit_price, total_price))
+                INSERT INTO sale_items (sale_id, product_id, quantity, unit_price, total_price, purchase_price)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (sale_id, product_id, quantity, unit_price, total_price, purchase_price))
             return cursor.lastrowid
     
     def update_product_stock(self, product_id, quantity_sold):
@@ -252,17 +323,24 @@ class Database:
             ''', (quantity_sold, product_id))
             return cursor.rowcount
     
-    def get_sale_details(self, sale_id):
-        """Get sale details with customer information"""
+    def get_sale_items(self, sale_id):
+        """Get all items for a specific sale with profit information"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                SELECT s.*, c.name as customer_name, c.phone, c.email, c.address
-                FROM sales s 
-                LEFT JOIN customers c ON s.customer_id = c.id 
-                WHERE s.id = ?
+                SELECT 
+                    si.*, 
+                    p.company, 
+                    p.type, 
+                    p.color, 
+                    p.packing, 
+                    p.volume,
+                    (si.unit_price - si.purchase_price) * si.quantity as item_profit
+                FROM sale_items si
+                JOIN products p ON si.product_id = p.id
+                WHERE si.sale_id = ?
             ''', (sale_id,))
-            return cursor.fetchone()
+            return cursor.fetchall()
     
     def get_sale_items(self, sale_id):
         """Get all items for a specific sale"""
@@ -274,28 +352,6 @@ class Database:
                 JOIN products p ON si.product_id = p.id
                 WHERE si.sale_id = ?
             ''', (sale_id,))
-            return cursor.fetchall()
-    
-    def get_sales_report(self, start_date=None, end_date=None):
-        """Get sales report for a date range"""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            
-            if start_date and end_date:
-                cursor.execute('''
-                    SELECT s.*, c.name as customer_name
-                    FROM sales s 
-                    LEFT JOIN customers c ON s.customer_id = c.id 
-                    WHERE s.sale_date BETWEEN ? AND ?
-                    ORDER BY s.sale_date DESC
-                ''', (start_date, end_date))
-            else:
-                cursor.execute('''
-                    SELECT s.*, c.name as customer_name
-                    FROM sales s 
-                    LEFT JOIN customers c ON s.customer_id = c.id 
-                    ORDER BY s.sale_date DESC
-                ''')
             return cursor.fetchall()
     
     def get_customer_by_name(self, customer_name):
