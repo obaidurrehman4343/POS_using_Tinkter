@@ -1,4 +1,3 @@
-
 from backend.database import Database
 
 class ProductService:

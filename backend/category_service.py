@@ -1,3 +1,4 @@
+
 from backend.database import Database
 
 class CategoryService:
@@ -39,6 +40,7 @@ class CategoryService:
             if cat[0] == category_id:
                 return cat
         return None
+    
     def delete_category(self, category_id):
         """Delete category by ID"""
         try:
